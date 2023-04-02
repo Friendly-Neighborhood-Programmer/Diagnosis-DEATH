@@ -321,7 +321,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
 void Game::Controls(double delta_time)
 {
     // Get player game object
-    GameObject *player = game_objects_[0];
+    PlayerGameObject *player = dynamic_cast<PlayerGameObject*>(game_objects_[0]);
     // Get current position and angle and velocity
     glm::vec3 curpos = player->GetPosition();
     float angle = player->GetAngle();
@@ -330,22 +330,26 @@ void Game::Controls(double delta_time)
     glm::vec3 dir = player->GetBearing();
     // Adjust motion increment and angle increment 
     // if translation or rotation is too slow
-    float speed = delta_time*1000.0;
+    float speed = delta_time*500.0;
     float motion_increment = 0.001*speed;
-    float angle_increment = (glm::pi<float>() / 1800.0f)*speed;
+    float angle_increment = (glm::pi<float>() / 1800.0f)*speed * 200;
 
     // Check for player input and make changes accordingly
     if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
-        player->SetVelocity(vel + dir * 0.02f);
+        player->setAccelerating(true);
+        player->SetVelocity(vel + dir * 0.02f * speed);
+    }
+    else {
+        player->setAccelerating(false);
     }
     if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
-        player->SetVelocity(vel - vel * 0.005f);
+        player->SetVelocity(vel - vel * 0.005f * speed);
     }
     if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
-        player->SetAngle(angle - glm::radians(0.2));
+        player->SetAngle(angle - glm::radians(angle_increment));
     }
     if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
-        player->SetAngle(angle + glm::radians(0.2));
+        player->SetAngle(angle + glm::radians(angle_increment));
     }
     if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS) {
         if (player->shoot()) {

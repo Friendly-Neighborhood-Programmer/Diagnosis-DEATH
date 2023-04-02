@@ -53,7 +53,7 @@ namespace game {
             void setType(ObjectType type) { oType = type; }
 
 
-            inline void SetVelocity(const glm::vec3& velocity) { velocity_ = velocity; }
+            virtual void SetVelocity(const glm::vec3& velocity);
 
             float timeAlive;
             void Explode(GLuint exp_texture);
@@ -64,6 +64,10 @@ namespace game {
 
 
         protected:
+            //proporties
+            float maxVelocity_;
+
+
             // Object's Transform Variables
             glm::vec3 position_;
             float scale_;

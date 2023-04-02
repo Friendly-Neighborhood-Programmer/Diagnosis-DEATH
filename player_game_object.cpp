@@ -1,5 +1,5 @@
 #include "player_game_object.h"
-
+#include <iostream>
 namespace game {
 
 /*
@@ -10,22 +10,27 @@ namespace game {
 PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture)
 	: GameObject(position, geom, shader, texture) {
     oType = Player;
+    maxVelocity_ = 5;
 }
 
 // Update function for moving the player object around
 void PlayerGameObject::Update(double delta_time) {
 
-    // and friction and set velocity to 0 if it becomes very small
+    // TODO MAKE FEEL BETTER, TWEEK VALUES
+    std::cout << glm::length(velocity_) << std::endl;
     if (glm::length(velocity_) > 2.0f) {
-        velocity_ -= velocity_ * 0.005f;
-    } else if ((glm::length(velocity_) < 2.0f)) {
-        velocity_ -= velocity_ * 0.002f;
-    } else if (glm::length(velocity_) < 0.02f) {
+        velocity_ -= velocity_ * 1.75f * glm::vec3(delta_time);
+    } else if (glm::length(velocity_) < 0.6f && !accelerating) {
         velocity_ = glm::vec3(0.0f, 0.0f, 0.0f);
+    } else if ((glm::length(velocity_) < 2.0f)) {
+        velocity_ -= velocity_ * 0.9f * glm::vec3(delta_time);
     }
 
 	// Call the parent's update method to move the object in standard way, if desired
 	GameObject::Update(delta_time);
 }
 
+void PlayerGameObject::setAccelerating(bool acc) {
+    accelerating = acc;
+}
 } // namespace game
