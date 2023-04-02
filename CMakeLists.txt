@@ -10,16 +10,10 @@ set(HDRS
     game.h
     game_object.h
     player_game_object.h
-	enemy_game_object.h
     shader.h
     geometry.h
     sprite.h
-    particles.h
-    particle_system.h
-	explosion_particle_system.h
-	trail_particles.h
-	explosion_particles.h
-	bullet_game_object.h
+    audio_manager.h
 )
  
 set(SRCS
@@ -28,23 +22,11 @@ set(SRCS
     game_object.cpp
     main.cpp
     player_game_object.cpp
-	enemy_game_object.cpp
     shader.cpp
     sprite.cpp
-    particles.cpp
-	trail_particles.cpp
-	explosion_particles.cpp
-    particle_system.cpp
-	explosion_particle_system.cpp
-	bullet_game_object.cpp
+    audio_manager.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
-    particle_vertex_shader.glsl
-    particle_fragment_shader.glsl
-	trail_particle_vertex_shader.glsl
-    trail_particle_fragment_shader.glsl
-	explosion_particle_vertex_shader.glsl
-    explosion_particle_fragment_shader.glsl
 )
 
 # Add path name to configuration file
@@ -58,7 +40,6 @@ add_executable(${PROJ_NAME} ${HDRS} ${SRCS})
 target_include_directories(${PROJ_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 # Require OpenGL library
-set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 target_link_libraries(${PROJ_NAME} ${OPENGL_gl_LIBRARY})
@@ -70,14 +51,20 @@ if(NOT WIN32)
     find_library(GLEW_LIBRARY GLEW)
     find_library(GLFW_LIBRARY glfw)
     find_library(SOIL_LIBRARY SOIL)
+    find_library(OPENAL_LIBRARY openal)
+    find_library(ALUT_LIBRARY alut)
 elseif(WIN32)
     find_library(GLEW_LIBRARY glew32s HINTS ${LIBRARY_PATH}/lib)
     find_library(GLFW_LIBRARY glfw3 HINTS ${LIBRARY_PATH}/lib)
     find_library(SOIL_LIBRARY SOIL HINTS ${LIBRARY_PATH}/lib)
+    find_library(OPENAL_LIBRARY "OpenAL32.lib" HINTS ${LIBRARY_PATH}/lib)
+    find_library(ALUT_LIBRARY "alut.lib" HINTS ${LIBRARY_PATH}/lib)
 endif(NOT WIN32)
 target_link_libraries(${PROJ_NAME} ${GLEW_LIBRARY})
 target_link_libraries(${PROJ_NAME} ${GLFW_LIBRARY})
 target_link_libraries(${PROJ_NAME} ${SOIL_LIBRARY})
+target_link_libraries(${PROJ_NAME} ${OPENAL_LIBRARY})
+target_link_libraries(${PROJ_NAME} ${ALUT_LIBRARY})
 
 # The rules here are specific to Windows Systems
 if(WIN32)
