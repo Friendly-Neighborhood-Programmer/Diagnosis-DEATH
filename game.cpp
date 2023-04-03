@@ -129,7 +129,8 @@ void Game::Setup(void)
 
     // Setup the player object (position, texture, vertex count)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
-    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[0]));
+    player = new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[0]);
+    game_objects_.push_back(player);
     game_objects_.push_back(new GameObject(glm::vec3(0.0f, 0.0f, -0.1f), sprite_, &sprite_shader_, tex_[7]));
     game_objects_[1]->SetParent(game_objects_[0]);
     game_objects_[1]->setType(GameObject::Blade);
@@ -321,7 +322,6 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
 void Game::Controls(double delta_time)
 {
     // Get player game object
-    PlayerGameObject *player = dynamic_cast<PlayerGameObject*>(game_objects_[0]);
     // Get current position and angle and velocity
     glm::vec3 curpos = player->GetPosition();
     float angle = player->GetAngle();

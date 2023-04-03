@@ -8,6 +8,7 @@
 
 #include "shader.h"
 #include "game_object.h"
+#include "player_game_object.h"
 
 namespace game {
 
@@ -75,6 +76,9 @@ namespace game {
             void Update(glm::mat4 view_matrix, double delta_time);
 
             float Game::randF(float min, float max);
+
+            //new stuff
+            PlayerGameObject* player;
 
     }; // class Game
 
