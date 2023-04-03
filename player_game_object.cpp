@@ -20,7 +20,7 @@ void PlayerGameObject::Update(double delta_time) {
     std::cout << glm::length(velocity_) << std::endl;
     if (glm::length(velocity_) > 2.0f) {
         velocity_ -= velocity_ * 1.75f * glm::vec3(delta_time);
-    } else if (glm::length(velocity_) < 0.6f && !accelerating) {
+    } else if (glm::length(velocity_) < 0.5f && !accelerating) {
         velocity_ = glm::vec3(0.0f, 0.0f, 0.0f);
     } else if ((glm::length(velocity_) < 2.0f)) {
         velocity_ -= velocity_ * 0.9f * glm::vec3(delta_time);
@@ -28,9 +28,5 @@ void PlayerGameObject::Update(double delta_time) {
 
 	// Call the parent's update method to move the object in standard way, if desired
 	GameObject::Update(delta_time);
-}
-
-void PlayerGameObject::setAccelerating(bool acc) {
-    accelerating = acc;
 }
 } // namespace game

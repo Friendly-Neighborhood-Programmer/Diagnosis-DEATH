@@ -13,9 +13,7 @@ namespace game {
 
             // Update function for moving the player object around
             void Update(double delta_time) override;
-            void setAccelerating(const bool);
-    private:
-        bool accelerating = false;
+
 
     }; // class PlayerGameObject
 

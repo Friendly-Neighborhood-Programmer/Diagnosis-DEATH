@@ -21,6 +21,7 @@ GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader
     timeAlive = 0.0f;
     parent = nullptr;
     maxVelocity_ = 6;
+    accelerating = false;
 }
 
 
@@ -179,5 +180,8 @@ void GameObject::SetVelocity(const glm::vec3& velocity) {
     if (maxVelocity_ > glm::length(velocity))
         velocity_ = velocity;
     else velocity_ = glm::vec3(maxVelocity_) * glm::normalize(velocity);
+}
+void GameObject::setAccelerating(bool acc) {
+    accelerating = acc;
 }
 } // namespace game

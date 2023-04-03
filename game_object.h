@@ -62,11 +62,14 @@ namespace game {
 
             bool isColliding(GameObject *other);
 
+            void setAccelerating(const bool);
+
+    private:
 
         protected:
             //proporties
             float maxVelocity_;
-
+            bool accelerating;
 
             // Object's Transform Variables
             glm::vec3 position_;
