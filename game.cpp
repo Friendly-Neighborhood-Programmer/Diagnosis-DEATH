@@ -129,8 +129,8 @@ void Game::Setup(void)
 
     // Setup the player object (position, texture, vertex count)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
-    player = new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[0]);
-    game_objects_.push_back(player);
+    players.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[0]));
+    game_objects_.push_back(players[0]);
     game_objects_.push_back(new GameObject(glm::vec3(0.0f, 0.0f, -0.1f), sprite_, &sprite_shader_, tex_[7]));
     game_objects_[1]->SetParent(game_objects_[0]);
     game_objects_[1]->setType(GameObject::Blade);
@@ -323,52 +323,55 @@ void Game::Controls(double delta_time)
 {
     // Get player game object
     // Get current position and angle and velocity
-    glm::vec3 curpos = player->GetPosition();
-    float angle = player->GetAngle();
-    glm::vec3 vel = player->GetVelocity();
-    // Compute current bearing direction
-    glm::vec3 dir = player->GetBearing();
-    // Adjust motion increment and angle increment 
-    // if translation or rotation is too slow
-    float speed = delta_time*500.0;
-    float motion_increment = 0.001*speed;
-    float angle_increment = (glm::pi<float>() / 1800.0f)*speed * 200;
+    for (int i = 0; i < players.size(); i++) {
+        PlayerGameObject* player = players[i];
+        glm::vec3 curpos = player->GetPosition();
+        float angle = player->GetAngle();
+        glm::vec3 vel = player->GetVelocity();
+        // Compute current bearing direction
+        glm::vec3 dir = player->GetBearing();
+        // Adjust motion increment and angle increment 
+        // if translation or rotation is too slow
+        float speed = delta_time * 500.0;
+        float motion_increment = 0.001 * speed;
+        float angle_increment = (glm::pi<float>() / 1800.0f) * speed * 200;
 
-    // Check for player input and make changes accordingly
-    if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
-        player->setAccelerating(true);
-        player->SetVelocity(vel + dir * 0.02f * speed);
-    }
-    else {
-        player->setAccelerating(false);
-    }
-    if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
-        player->SetVelocity(vel - vel * 0.005f * speed);
-    }
-    if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
-        player->SetAngle(angle - glm::radians(angle_increment));
-    }
-    if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
-        player->SetAngle(angle + glm::radians(angle_increment));
-    }
-    if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS) {
-        if (player->shoot()) {
-            GameObject* bullet = new BulletGameObject(curpos, sprite_, &sprite_shader_, tex_[6]);
-            bullet->SetScale(0.8);
-            bullet->SetAngle(angle);
-            bullet->SetVelocity(player->GetBearing() * 5.0f);
-            game_objects_.push_back(bullet);
-
-            GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullet);
-            particles->SetScale(0.08);
-            game_objects_.push_back(particles);
+        // Check for player input and make changes accordingly
+        if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
+            player->setAccelerating(true);
+            player->SetVelocity(vel + dir * 0.02f * speed);
         }
-    }
-    if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
-        player->SetPosition(curpos - motion_increment*player->GetRight());
-    }
-    if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
-        player->SetPosition(curpos + motion_increment*player->GetRight());
+        else {
+            player->setAccelerating(false);
+        }
+        if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
+            player->SetVelocity(vel - vel * 0.005f * speed);
+        }
+        if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
+            player->SetAngle(angle - glm::radians(angle_increment));
+        }
+        if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
+            player->SetAngle(angle + glm::radians(angle_increment));
+        }
+        if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS) {
+            if (player->shoot()) {
+                GameObject* bullet = new BulletGameObject(curpos, sprite_, &sprite_shader_, tex_[6]);
+                bullet->SetScale(0.8);
+                bullet->SetAngle(angle);
+                bullet->SetVelocity(player->GetBearing() * 5.0f);
+                game_objects_.push_back(bullet);
+
+                GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullet);
+                particles->SetScale(0.08);
+                game_objects_.push_back(particles);
+            }
+        }
+        if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
+            player->SetPosition(curpos - motion_increment * player->GetRight());
+        }
+        if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
+            player->SetPosition(curpos + motion_increment * player->GetRight());
+        }
     }
     if (glfwGetKey(window_, GLFW_KEY_Q) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window_, true);

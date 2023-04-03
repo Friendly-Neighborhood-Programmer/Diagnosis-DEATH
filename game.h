@@ -78,7 +78,7 @@ namespace game {
             float Game::randF(float min, float max);
 
             //new stuff
-            PlayerGameObject* player;
+            std::vector<PlayerGameObject*> players;
 
     }; // class Game
 
