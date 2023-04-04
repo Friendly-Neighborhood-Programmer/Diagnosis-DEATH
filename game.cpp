@@ -15,6 +15,7 @@
 #include "player_game_object.h"
 #include "enemy_game_object.h"
 #include "bullet_game_object.h"
+#include "player_bullet_game_object.h"
 #include "particle_system.h"
 #include "explosion_particle_system.h"
 #include "game.h"
@@ -523,22 +524,13 @@ void Game::Controls(double delta_time)
         player->SetAngle(angle + glm::radians(angle_increment));
     }
     if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS) {
-        if (player->shoot()) {
+        if (player->canShoot()) {
             for (int i = 0; i < NUM_PLAYERS; i++) {
                 GameObject* player = players[i];
                 if (player == nullptr) {
                     break;
                 }
-                curpos = player->GetPosition();
-                angle = player->GetAngle();
-                vel = player->GetVelocity();
-                // Compute current bearing direction
-                dir = player->GetBearing();
-
-                GameObject* bullet = new BulletGameObject(curpos, sprite_, &sprite_shader_, tex_[6]);
-                bullet->SetScale(0.8);
-                bullet->SetAngle(angle);
-                bullet->SetVelocity(player->GetBearing() * 5.0f);
+                GameObject* bullet = player->shoot(sprite_, &sprite_shader_, tex_[6]);
                 game_objects_.push_back(bullet);
 
                 GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullet);
@@ -546,6 +538,18 @@ void Game::Controls(double delta_time)
                 game_objects_.push_back(particles);
 
                 bullet->setChildParticle(particles);
+            }
+        }
+    }
+    if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        if (player->canShoot()) {
+            for (int i = 0; i < NUM_PLAYERS; i++) {
+                PlayerGameObject* player = players[i];
+                if (player == nullptr) {
+                    break;
+                }
+                vector<PlayerBulletGameObject*> bullets = player->spiralShoot(sprite_, &sprite_shader_, tex_[6]);
+                game_objects_.insert(game_objects_.end(), bullets.begin(), bullets.end());
             }
         }
     }

@@ -10,6 +10,8 @@ namespace game {
     BulletGameObject::BulletGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture)
         : GameObject(position, geom, shader, texture) {
         oType = Bullet;
+        bType = Generic;
+        speed = 1.0f;
     }
 
     // Update function for moving the player object around
@@ -19,5 +21,8 @@ namespace game {
         // Call the parent's update method to move the object in standard way, if desired
         GameObject::Update(delta_time);
     }
+
+    void BulletGameObject::setSpeed(float s) { speed = s; }
+    float BulletGameObject::getSpeed() { return speed; }
 
 } // namespace game

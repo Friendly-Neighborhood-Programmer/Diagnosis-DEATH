@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "game_object.h"
-
+#include "bullet_game_object.h"
 namespace game {
 
 GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture) 
@@ -26,6 +26,7 @@ GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader
     particle = nullptr;
     bullet = nullptr;
     bulletAmount = 3;
+    cooldown = 0.7f;
 }
 
 
@@ -62,14 +63,18 @@ void GameObject::SetParent(GameObject *p) {
     parent = p;
 }
 
-bool GameObject::shoot() {
-    if (shotCooldown >= 1.5) {
+bool GameObject::canShoot() {
+    if (shotCooldown >= cooldown) {
         shotCooldown = 0.0f;
         return true;
     }
     return false;
 }
 
+BulletGameObject* GameObject::shoot(Geometry* sprite, Shader* shader, GLuint texture) {
+    BulletGameObject* bullet = new BulletGameObject(position_, sprite, shader, texture);
+    return bullet;
+}
 void GameObject::die() {
     state_ = Died;
     if (particle != nullptr) {

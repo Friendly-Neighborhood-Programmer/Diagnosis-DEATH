@@ -2,9 +2,10 @@
 #define PLAYER_GAME_OBJECT_H_
 
 #include "game_object.h"
-
+#include <vector>
+using namespace std;
 namespace game {
-
+    class PlayerBulletGameObject;
     // Inherits from GameObject
     class PlayerGameObject : public GameObject {
 
@@ -13,7 +14,11 @@ namespace game {
 
             // Update function for moving the player object around
             void Update(double delta_time) override;
+            virtual BulletGameObject* shoot(Geometry* geom, Shader* shader, GLuint texture);
+            vector<PlayerBulletGameObject*> spiralShoot(Geometry* sprite, Shader* shader, GLuint texture);
 
+    private:
+        int spiralShotAmt;
 
     }; // class PlayerGameObject
 

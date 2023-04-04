@@ -20,6 +20,7 @@ set(HDRS
 	trail_particles.h
 	explosion_particles.h
 	bullet_game_object.h
+	player_bullet_game_object.h
 	audio_manager.h
 	collectible_game_object.h
 )
@@ -39,6 +40,7 @@ set(SRCS
     particle_system.cpp
 	explosion_particle_system.cpp
 	bullet_game_object.cpp
+	player_bullet_game_object.cpp
 	audio_manager.cpp
 	collectible_game_object.cpp
     sprite_vertex_shader.glsl

@@ -7,9 +7,10 @@
 
 #include "shader.h"
 #include "geometry.h"
-
+#include <vector>
+using namespace std;
 namespace game {
-
+    class BulletGameObject;
     /*
         GameObject is responsible for handling the rendering and updating of one object in the game world
         The update and render methods are virtual, so you can inherit them from GameObject and override the update or render functionality (see PlayerGameObject for reference)
@@ -70,7 +71,8 @@ namespace game {
             float timeAlive;
             void Explode(GLuint exp_texture);
 
-            bool shoot();
+            bool canShoot();
+            virtual BulletGameObject* shoot(Geometry* geom, Shader* shader, GLuint texture);
 
             bool isColliding(GameObject *other);
 
@@ -86,7 +88,7 @@ namespace game {
             //proporties
             float maxVelocity_;
             bool accelerating;
-
+            float cooldown;
             // Object's Transform Variables
             glm::vec3 position_;
             float scale_;
