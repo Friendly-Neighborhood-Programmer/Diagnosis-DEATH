@@ -57,6 +57,7 @@ namespace game {
             void SetAngle(float angle);
             void SetParent(GameObject*);
             void setType(ObjectType type) { oType = type; }
+            void setDamage(int amount) { damage = amount; }
             void setMaxHealth(int newHealth) { maxHealth = newHealth; }
             int getMaxHealth() { return maxHealth; }
             virtual void setChildParticle(GameObject* newP) { particle = newP; };
