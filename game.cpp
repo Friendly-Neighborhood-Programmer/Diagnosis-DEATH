@@ -322,18 +322,20 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
             // If distance is below a threshold, we have a collision
             if (distance < 0.8f) {
                 // check collision of player with collectible
-                if (current_game_object->getType() == GameObject::Player && other_game_object->getType() == GameObject::Collectible) {
-                    PlayerGameObject* player_obj = dynamic_cast<PlayerGameObject*>(current_game_object);
-                    CollectibleGameObject* collectible_obj = dynamic_cast<CollectibleGameObject*>(other_game_object);
+                if (current_game_object->getType() == GameObject::Player && other_game_object->getType() >= GameObject::Collectible) {
+                    other_game_object->die();
 
-                    //player_obj->pickCollectible();
+                    switch (other_game_object->getType()) {
 
-                    collectible_obj->die();
-                    continue;
+                    case GameObject::Fat:
+                    case GameObject::Germ:
+                    case GameObject::Bacteria:
+                        break;
+                    }
                 }
 
                 // make sure the collectible cannot be collided with by enemy
-                if (current_game_object->getType() == GameObject::Collectible || other_game_object->getType() == GameObject::Collectible) {
+                if (current_game_object->getType() >= GameObject::Collectible || other_game_object->getType() >= GameObject::Collectible) {
                     continue;
                 }
 

@@ -19,7 +19,8 @@ namespace game {
         public:
             enum State { Active, Exploded, Died };
 
-            enum ObjectType { Player, Collectible, Enemy, Bullet, Particles, Blade };
+            //KEEP COLLECTIBLE AND ON AS THE LAST 4 IN THIS ENUM
+            enum ObjectType { Player, Enemy, Bullet, Particles, Blade, Collectible, Bacteria, Fat, Germ};
 
             // Constructor
             GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture);
