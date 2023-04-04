@@ -14,7 +14,6 @@ namespace game {
 
     // Update function for moving the player object around
     void BulletGameObject::Update(double delta_time) {
-
         //if (lifetime >= 1.0f) { state_ = Exploded; }
 
         // Call the parent's update method to move the object in standard way, if desired

@@ -22,6 +22,8 @@ GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader
     parent = nullptr;
     maxVelocity_ = 6;
     accelerating = false;
+    damage = 1;
+    particle = nullptr;
 }
 
 
@@ -64,6 +66,13 @@ bool GameObject::shoot() {
         return true;
     }
     return false;
+}
+
+void GameObject::die() {
+    state_ = Died;
+    if (particle != nullptr) {
+        particle->die();
+    }
 }
 
 bool GameObject::isColliding(GameObject *other) {
@@ -184,4 +193,12 @@ void GameObject::SetVelocity(const glm::vec3& velocity) {
 void GameObject::setAccelerating(bool acc) {
     accelerating = acc;
 }
+
+void GameObject::takeDamage(int dmg) {
+    curHealth -= dmg;
+    if (curHealth <= 0) {
+        die();
+    }
+}
+
 } // namespace game

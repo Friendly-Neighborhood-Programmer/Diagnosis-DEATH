@@ -30,6 +30,10 @@ namespace game {
             // Renders the GameObject 
             virtual void Render(glm::mat4 view_matrix, double current_time);
 
+            virtual void die();
+
+            virtual void takeDamage(int);
+
             // Getters
             inline glm::vec3& GetPosition(void) { return position_; }
             inline float GetScale(void) { return scale_; }
@@ -37,6 +41,7 @@ namespace game {
             inline glm::vec3& GetVelocity(void) { return velocity_; }
             inline State GetState(void) { return state_; }
             inline ObjectType getType() { return oType; }
+            virtual int getDamage() { return damage; };
 
             // Get bearing direction (direction in which the game object
             // is facing)
@@ -51,6 +56,7 @@ namespace game {
             void SetAngle(float angle);
             void SetParent(GameObject*);
             void setType(ObjectType type) { oType = type; }
+            virtual void setChildParticle(GameObject* newP) { particle = newP; };
 
 
             virtual void SetVelocity(const glm::vec3& velocity);
@@ -63,6 +69,7 @@ namespace game {
             bool isColliding(GameObject *other);
 
             void setAccelerating(const bool);
+
 
     private:
 
@@ -100,6 +107,11 @@ namespace game {
             glm::vec3 startPos;
 
             GameObject *parent;
+            int damage;
+            int maxHealth;
+            int curHealth;
+
+            GameObject* particle;
 
     }; // class GameObject
 

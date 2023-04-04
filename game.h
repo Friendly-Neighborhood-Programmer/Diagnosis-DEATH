@@ -51,7 +51,7 @@ namespace game {
             Shader explosion_particle_shader_;
 
             // References to textures
-#define NUM_TEXTURES 8
+#define NUM_TEXTURES 11
             GLuint tex_[NUM_TEXTURES];
 
             // List of game objects

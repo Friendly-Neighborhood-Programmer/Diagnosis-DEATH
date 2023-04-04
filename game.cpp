@@ -18,6 +18,7 @@
 #include "particle_system.h"
 #include "explosion_particle_system.h"
 #include "game.h"
+#include "collectible_game_object.h"
 
 using namespace std;
 
@@ -196,6 +197,9 @@ void Game::SetAllTextures(void)
     SetTexture(tex_[5], (resources_directory_g + std::string("/textures/explosion.png")).c_str());
     SetTexture(tex_[6], (resources_directory_g + std::string("/textures/bullet.png")).c_str());
     SetTexture(tex_[7], (resources_directory_g + std::string("/textures/blade.png")).c_str());
+    SetTexture(tex_[8], (resources_directory_g + std::string("/textures/germ_powerup.png")).c_str());
+    SetTexture(tex_[9], (resources_directory_g + std::string("/textures/fat_powerup.png")).c_str());
+    SetTexture(tex_[10], (resources_directory_g + std::string("/textures/bacteria_powerup.png")).c_str());
     glBindTexture(GL_TEXTURE_2D, tex_[0]);
 }
 
@@ -283,6 +287,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
 
             if (current_game_object->GetState() == GameObject::Exploded || other_game_object->GetState() == GameObject::Exploded) continue;
             if (current_game_object->getType() == GameObject::Particles || other_game_object->getType() == GameObject::Particles) continue;
+            if (current_game_object->GetState() == GameObject::Died || other_game_object->GetState() == GameObject::Died) continue;
 
             // Compute distance between object i and object j
             float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
@@ -297,6 +302,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
             //}
 
             // check for raycast collisions between bullets and enemies
+            /*
             if (current_game_object->getType() == GameObject::Enemy && other_game_object->getType() == GameObject::Bullet) {
                 if (!other_game_object->isColliding(current_game_object)) { continue; }
 
@@ -310,6 +316,53 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                 GameObject* explosion2 = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], other_game_object);
                 explosion2->SetScale(0.08);
                 game_objects_.push_back(explosion2);
+            }
+            */
+
+            // If distance is below a threshold, we have a collision
+            if (distance < 0.8f) {
+                // check collision of player with collectible
+                if (current_game_object->getType() == GameObject::Player && other_game_object->getType() == GameObject::Collectible) {
+                    PlayerGameObject* player_obj = dynamic_cast<PlayerGameObject*>(current_game_object);
+                    CollectibleGameObject* collectible_obj = dynamic_cast<CollectibleGameObject*>(other_game_object);
+
+                    //player_obj->pickCollectible();
+
+                    collectible_obj->die();
+                    continue;
+                }
+
+                // make sure the collectible cannot be collided with by enemy
+                if (current_game_object->getType() == GameObject::Collectible || other_game_object->getType() == GameObject::Collectible) {
+                    continue;
+                }
+
+                if ((current_game_object->getType() == GameObject::Bullet || other_game_object->getType() == GameObject::Bullet) && 
+                    (current_game_object->getType() == GameObject::Enemy || other_game_object->getType() == GameObject::Enemy)) {
+                    if (other_game_object->getType() == GameObject::Enemy) {
+                        other_game_object->takeDamage(current_game_object->getDamage());
+                        current_game_object->die();
+                    }
+                    else {
+                        current_game_object->takeDamage(other_game_object->getDamage());
+                        other_game_object->die();
+                    }
+                }
+
+                /*
+                if (current_game_object->decreaseHealth() == 0) {
+                    playExplosion();
+                    game_objects_.at(i) = new GameObject(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[3]);
+                    current_game_object = game_objects_[i];
+                    current_game_object->decreaseHealth(); // make sure the new object's health is 0
+                    current_game_object->setTime(current_time_);
+                }
+                if (other_game_object->decreaseHealth() == 0) {
+                    playExplosion();
+                    game_objects_.at(j) = new GameObject(other_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[3]);
+                    game_objects_.at(j)->setTime(current_time_);
+                }
+                */
             }
         }
 
@@ -364,6 +417,8 @@ void Game::Controls(double delta_time)
                 GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullet);
                 particles->SetScale(0.08);
                 game_objects_.push_back(particles);
+
+                bullet->setChildParticle(particles);
             }
         }
         if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {

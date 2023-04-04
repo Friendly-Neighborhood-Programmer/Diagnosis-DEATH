@@ -17,7 +17,6 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
 void PlayerGameObject::Update(double delta_time) {
 
     // TODO MAKE FEEL BETTER, TWEEK VALUES
-    std::cout << glm::length(velocity_) << std::endl;
     if (glm::length(velocity_) > 2.0f) {
         velocity_ -= velocity_ * 1.75f * glm::vec3(delta_time);
     } else if (glm::length(velocity_) < 0.5f && !accelerating) {

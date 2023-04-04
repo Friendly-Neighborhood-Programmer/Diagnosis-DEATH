@@ -16,7 +16,7 @@ ParticleSystem::ParticleSystem(const glm::vec3 &position, Geometry *geom, Shader
 
 
 void ParticleSystem::Update(double delta_time) {
-    if (parent_->GetState() == Exploded) {
+    if (parent_->GetState() == Exploded || parent_->GetState() == Died || parent_ == nullptr) {
         state_ = Died;
     }
 

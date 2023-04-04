@@ -21,6 +21,7 @@ set(HDRS
 	explosion_particles.h
 	bullet_game_object.h
 	audio_manager.h
+	collectible_game_object.h
 )
  
 set(SRCS
@@ -39,6 +40,7 @@ set(SRCS
 	explosion_particle_system.cpp
 	bullet_game_object.cpp
 	audio_manager.cpp
+	collectible_game_object.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     particle_vertex_shader.glsl
