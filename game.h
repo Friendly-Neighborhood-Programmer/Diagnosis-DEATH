@@ -10,6 +10,8 @@
 #include "game_object.h"
 #include "player_game_object.h"
 
+#define NUM_PLAYERS 3
+
 namespace game {
 
     // A class for holding the main game objects
@@ -33,7 +35,7 @@ namespace game {
         private:
             // Main window: pointer to the GLFW window structure
             GLFWwindow *window_;
-
+            float camera_zoom;
             // Sprite geometry
             Geometry *sprite_;
 
@@ -49,6 +51,9 @@ namespace game {
             Shader particle_shader_;
             Shader trail_particle_shader_;
             Shader explosion_particle_shader_;
+
+            float germTimer;
+            bool germActivated;
 
             // References to textures
 #define NUM_TEXTURES 11
@@ -78,7 +83,7 @@ namespace game {
             float Game::randF(float min, float max);
 
             //new stuff
-            std::vector<PlayerGameObject*> players;
+            PlayerGameObject* players[NUM_PLAYERS];
 
     }; // class Game
 

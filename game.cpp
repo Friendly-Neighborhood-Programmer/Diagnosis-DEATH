@@ -20,6 +20,10 @@
 #include "game.h"
 #include "collectible_game_object.h"
 
+#define GERM_INTERVAL 30
+#define CLONE_HEALTH 3
+#define PLAYER_START_HEALTH 5
+
 using namespace std;
 
 namespace game {
@@ -45,7 +49,12 @@ Game::Game(void)
 
 void Game::Init(void)
 {
-
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        players[i] = nullptr;
+    }
+    germActivated = false;
+    germTimer = 0;
+    camera_zoom = 0.25f;
     // Initialize the window management library (GLFW)
     if (!glfwInit()) {
         throw(std::runtime_error(std::string("Could not initialize the GLFW library")));
@@ -130,7 +139,8 @@ void Game::Setup(void)
 
     // Setup the player object (position, texture, vertex count)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
-    players.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[0]));
+    players[0] = new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[0]);
+    players[0]->setMaxHealth(5);
     game_objects_.push_back(players[0]);
     game_objects_.push_back(new GameObject(glm::vec3(0.0f, 0.0f, -0.1f), sprite_, &sprite_shader_, tex_[7]));
     game_objects_[1]->SetParent(game_objects_[0]);
@@ -140,6 +150,30 @@ void Game::Setup(void)
     int num_enemies = 10;
     for (int i = 0; i < num_enemies; i++) {
         game_objects_.push_back(new EnemyGameObject(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[2]));
+    }
+
+    for (int i = 0; i < 4; i++) {
+        GameObject* newObj = new CollectibleGameObject(glm::vec3(randF(-4.0, 4.0), randF(-4.0, 4.0), 0.0f), sprite_, &sprite_shader_, tex_[10]);
+        newObj->setType(GameObject::Bacteria);
+        newObj->SetScale(0.25f);
+
+        game_objects_.push_back(newObj);
+    }
+
+    for (int i = 0; i < 4; i++) {
+        GameObject* newObj = new CollectibleGameObject(glm::vec3(randF(-4.0, 4.0), randF(-4.0, 4.0), 0.0f), sprite_, &sprite_shader_, tex_[9]);
+        newObj->setType(GameObject::Fat);
+        newObj->SetScale(0.25f);
+
+        game_objects_.push_back(newObj);
+    }
+
+    for (int i = 0; i < 4; i++) {
+        GameObject* newObj = new CollectibleGameObject(glm::vec3(randF(-4.0, 4.0), randF(-4.0, 4.0), 0.0f), sprite_, &sprite_shader_, tex_[8]);
+        newObj->setType(GameObject::Germ);
+        newObj->SetScale(0.25f);
+
+        game_objects_.push_back(newObj);
     }
 
     // Setup background
@@ -217,7 +251,7 @@ void Game::MainLoop(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Set view to zoom out, centered by default at 0,0
-        float camera_zoom = 0.25f;
+        
         glm::mat4 view_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(camera_zoom, camera_zoom, camera_zoom));
 
         // Calculate delta time
@@ -243,6 +277,31 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
     // Update time
     current_time_ += delta_time;
 
+    if (germActivated) {
+        if (current_time_ > germTimer) {
+            for (int i = 1; i < NUM_PLAYERS; i++) {
+                if (players[i] != nullptr) {
+                    players[i]->die();
+                    players[i] = nullptr;
+                }
+            }
+            germActivated = false;
+        }
+        else {
+            for (int i = 1; i < NUM_PLAYERS; i++) {
+                if (players[i] != nullptr) {
+                    players[i]->SetAngle(players[0]->GetAngle());
+                    players[i]->setDamage(players[0]->getDamage());
+                    if(i == 1)
+                        players[i]->SetPosition(players[0]->GetPosition() + glm::vec3(-1.0f * players[0]->GetScale(), 0.0f, 0.0f));
+                    else if(i == 2)
+                        players[i]->SetPosition(players[0]->GetPosition() + glm::vec3(1.0f * players[0]->GetScale(), 0.0f, 0.0f));
+                    players[i]->SetScale(players[0]->GetScale());
+                    players[i]->SetVelocity(players[0]->GetVelocity());
+                }
+            }
+        }
+    }
     // Handle user input
     Controls(delta_time);
 
@@ -256,6 +315,10 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
 
         // Check if game object already died
         if (current_game_object->GetState() == GameObject::Died) {
+            if (i == 0) {
+                cout << "GAME OVER." << endl;
+                glfwSetWindowShouldClose(window_, true);
+            }
             // Remove object from the list of objects
             game_objects_.erase(game_objects_.begin() + i);
             // Delete game object from memory
@@ -320,22 +383,45 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
             */
 
             // If distance is below a threshold, we have a collision
-            if (distance < 0.8f) {
+            if (distance < (0.65f) * current_game_object->GetScale()) {
                 // check collision of player with collectible
                 if (current_game_object->getType() == GameObject::Player && other_game_object->getType() >= GameObject::Collectible) {
                     other_game_object->die();
 
                     switch (other_game_object->getType()) {
 
-                    case GameObject::Fat:
-                        break;
-                    case GameObject::Germ:
-                        break;
-                    case GameObject::Bacteria:
-                        players[0]->SetScale(players[0]->GetScale() + 1.0f);
-                        players[0]->setMaxHealth(players[0]->getMaxHealth() + 1);
-                        break;
+                        //IF NEED TWEAK ANY POWERUPS, IT'S ALL GONNA BE HERE
+                        //(except for clone (germ) it has 3 constants up top)
+                        case GameObject::Fat:
+                            players[0]->addBulletAmount(2);
+                            break;
+                        case GameObject::Germ:
+                            germActivated = true;
+                            germTimer = current_time_ + GERM_INTERVAL;
+                            for (int i = 1; i < NUM_PLAYERS; i++) {
+                                if (players[i] != nullptr) {
+                                    players[i]->die();
+                                }
+                                if(i == 1)
+                                    players[i] = new PlayerGameObject(players[0]->GetPosition() + (glm::vec3(-1.0f, 0.0f, 0.0f)), sprite_, &sprite_shader_, tex_[2]);
+                                else if(i == 2)
+                                    players[i] = new PlayerGameObject(players[0]->GetPosition() + (glm::vec3(1.0f, 0.0f, 0.0f)), sprite_, &sprite_shader_, tex_[1]);
+                                players[i]->setMaxHealth(CLONE_HEALTH);
+                                players[i]->heal(CLONE_HEALTH);
+                                game_objects_.insert(game_objects_.begin() + 1, players[i]);
+                            }
+                            
 
+                            break;
+                        case GameObject::Bacteria:
+                            players[0]->SetScale(players[0]->GetScale() + 0.15f);
+                            players[0]->setMaxHealth(players[0]->getMaxHealth() + 1);
+                            players[0]->heal(1);
+                            players[0]->setDamage(players[0]->getDamage() + 1);
+                            camera_zoom -= 0.03f;
+                            break;
+                        default:
+                            break;
                     }
                 }
 
@@ -353,6 +439,30 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                     else {
                         current_game_object->takeDamage(other_game_object->getDamage());
                         other_game_object->die();
+                    }
+                }
+
+                if ((current_game_object->getType() == GameObject::Player || other_game_object->getType() == GameObject::Player) &&
+                    (current_game_object->getType() == GameObject::Enemy || other_game_object->getType() == GameObject::Enemy)) {
+                    if (other_game_object->getType() == GameObject::Enemy) {
+                        //insta-kill enemy for now
+                        other_game_object->takeDamage(other_game_object->getMaxHealth());
+                        current_game_object->takeDamage(other_game_object->getDamage());  
+                    }
+                    else {
+                        //insta-kill enemy for now
+                        current_game_object->takeDamage(current_game_object->getMaxHealth());
+                        other_game_object->takeDamage(current_game_object->getDamage());
+                    }
+                    for (int i = 0; i < NUM_PLAYERS; i++) {
+                        if (players[i] != nullptr) {
+                            if (players[i]->GetState() == GameObject::Died) {
+                                players[i] = nullptr;
+                            }
+                        }
+                    }
+                    if (players[1] == nullptr && players[2] == nullptr) {
+                        germActivated = false;
                     }
                 }
 
@@ -383,38 +493,48 @@ void Game::Controls(double delta_time)
 {
     // Get player game object
     // Get current position and angle and velocity
-    for (int i = 0; i < players.size(); i++) {
-        PlayerGameObject* player = players[i];
-        glm::vec3 curpos = player->GetPosition();
-        float angle = player->GetAngle();
-        glm::vec3 vel = player->GetVelocity();
-        // Compute current bearing direction
-        glm::vec3 dir = player->GetBearing();
-        // Adjust motion increment and angle increment 
-        // if translation or rotation is too slow
-        float speed = delta_time * 500.0;
-        float motion_increment = 0.001 * speed;
-        float angle_increment = (glm::pi<float>() / 1800.0f) * speed * 200;
+    PlayerGameObject* player = players[0];
+    glm::vec3 curpos = player->GetPosition();
+    float angle = player->GetAngle();
+    glm::vec3 vel = player->GetVelocity();
+    // Compute current bearing direction
+    glm::vec3 dir = player->GetBearing();
+    // Adjust motion increment and angle increment 
+    // if translation or rotation is too slow
+    float speed = delta_time * 500.0;
+    float motion_increment = 0.001 * speed;
+    float angle_increment = (glm::pi<float>() / 1800.0f) * speed * 200;
 
-        // Check for player input and make changes accordingly
-        if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
-            player->setAccelerating(true);
-            player->SetVelocity(vel + dir * 0.02f * speed);
-        }
-        else {
-            player->setAccelerating(false);
-        }
-        if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
-            player->SetVelocity(vel - vel * 0.005f * speed);
-        }
-        if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
-            player->SetAngle(angle - glm::radians(angle_increment));
-        }
-        if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
-            player->SetAngle(angle + glm::radians(angle_increment));
-        }
-        if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS) {
-            if (player->shoot()) {
+    // Check for player input and make changes accordingly
+    if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS) {
+        player->setAccelerating(true);
+        player->SetVelocity(vel + dir * 0.02f * speed);
+    }
+    else {
+        player->setAccelerating(false);
+    }
+    if (glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS) {
+        player->SetVelocity(vel - vel * 0.005f * speed);
+    }
+    if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
+        player->SetAngle(angle - glm::radians(angle_increment));
+    }
+    if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
+        player->SetAngle(angle + glm::radians(angle_increment));
+    }
+    if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS) {
+        if (player->shoot()) {
+            for (int i = 0; i < NUM_PLAYERS; i++) {
+                GameObject* player = players[i];
+                if (player == nullptr) {
+                    break;
+                }
+                curpos = player->GetPosition();
+                angle = player->GetAngle();
+                vel = player->GetVelocity();
+                // Compute current bearing direction
+                dir = player->GetBearing();
+
                 GameObject* bullet = new BulletGameObject(curpos, sprite_, &sprite_shader_, tex_[6]);
                 bullet->SetScale(0.8);
                 bullet->SetAngle(angle);
@@ -428,12 +548,12 @@ void Game::Controls(double delta_time)
                 bullet->setChildParticle(particles);
             }
         }
-        if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
-            player->SetPosition(curpos - motion_increment * player->GetRight());
-        }
-        if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
-            player->SetPosition(curpos + motion_increment * player->GetRight());
-        }
+    }
+    if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
+        player->SetPosition(curpos - motion_increment * player->GetRight());
+    }
+    if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
+        player->SetPosition(curpos + motion_increment * player->GetRight());
     }
     if (glfwGetKey(window_, GLFW_KEY_Q) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window_, true);
