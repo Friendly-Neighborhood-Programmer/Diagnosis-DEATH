@@ -58,7 +58,7 @@ namespace game {
             void SetParent(GameObject*);
             void setType(ObjectType type) { oType = type; }
             virtual void setChildParticle(GameObject* newP) { particle = newP; };
-
+            virtual void setBullet(GameObject* newBullet) { bullet = newBullet; }
 
             virtual void SetVelocity(const glm::vec3& velocity);
 
@@ -70,6 +70,9 @@ namespace game {
             bool isColliding(GameObject *other);
 
             void setAccelerating(const bool);
+
+            void addBulletAmount(int amount) { bulletAmount += amount; }
+            void removeBulletAmount(int amount) { bulletAmount -= amount; }
 
 
     private:
@@ -113,6 +116,9 @@ namespace game {
             int curHealth;
 
             GameObject* particle;
+
+            GameObject* bullet;
+            int bulletAmount;
 
     }; // class GameObject
 

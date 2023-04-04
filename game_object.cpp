@@ -24,6 +24,8 @@ GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader
     accelerating = false;
     damage = 1;
     particle = nullptr;
+    bullet = nullptr;
+    bulletAmount = 3;
 }
 
 
