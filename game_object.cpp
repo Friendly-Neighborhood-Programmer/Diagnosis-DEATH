@@ -203,4 +203,11 @@ void GameObject::takeDamage(int dmg) {
     }
 }
 
+void GameObject::heal(int amount) {
+    curHealth += amount;
+    if (curHealth > maxHealth) {
+        curHealth = maxHealth;
+    }
+}
+
 } // namespace game

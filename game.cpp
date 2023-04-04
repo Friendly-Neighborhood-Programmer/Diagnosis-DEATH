@@ -328,9 +328,14 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                     switch (other_game_object->getType()) {
 
                     case GameObject::Fat:
-                    case GameObject::Germ:
-                    case GameObject::Bacteria:
                         break;
+                    case GameObject::Germ:
+                        break;
+                    case GameObject::Bacteria:
+                        players[0]->SetScale(players[0]->GetScale() + 1.0f);
+                        players[0]->setMaxHealth(players[0]->getMaxHealth() + 1);
+                        break;
+
                     }
                 }
 

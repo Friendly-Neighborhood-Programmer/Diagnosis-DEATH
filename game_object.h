@@ -57,10 +57,14 @@ namespace game {
             void SetAngle(float angle);
             void SetParent(GameObject*);
             void setType(ObjectType type) { oType = type; }
+            void setMaxHealth(int newHealth) { maxHealth = newHealth; }
+            int getMaxHealth() { return maxHealth; }
             virtual void setChildParticle(GameObject* newP) { particle = newP; };
             virtual void setBullet(GameObject* newBullet) { bullet = newBullet; }
 
             virtual void SetVelocity(const glm::vec3& velocity);
+
+            virtual void heal(int amount);
 
             float timeAlive;
             void Explode(GLuint exp_texture);
