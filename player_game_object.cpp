@@ -1,6 +1,7 @@
 #include "player_game_object.h"
 #include <iostream>
 #include "player_bullet_game_object.h"
+#include <glm/gtc/matrix_transform.hpp>
 namespace game {
 
 /*
@@ -44,7 +45,9 @@ vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, 
         direction.x = glm::cos((float)i);
         direction.y = glm::sin((float)i);
         direction = glm::normalize(direction);
-        angle = (glm::atan(direction.y / direction.x)); // Doesnt work, but doesnt matter :sunglasses:
+        angle = (glm::atan(direction.y / direction.x));
+        angle += (glm::pi<float>() / 2); //Uneeded, but might be useful later
+        std::cout << angle << std::endl;
         PlayerBulletGameObject* bullet = new PlayerBulletGameObject(position_, angle, direction, sprite, shader, texture);
         bullets.push_back(bullet);
     }
