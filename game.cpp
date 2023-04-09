@@ -24,7 +24,7 @@
 #include "collectible_game_object.h"
 
 #define GERM_INTERVAL 30
-#define PLAYER_START_HEALTH 7
+#define PLAYER_START_HEALTH 10
 
 using namespace std;
 
@@ -142,7 +142,7 @@ void Game::Setup(void)
     // Setup the player object (position, texture, vertex count)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
     players[0] = new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[0]);
-    players[0]->setMaxHealth(5);
+    players[0]->setMaxHealth(PLAYER_START_HEALTH);
     game_objects_.push_back(players[0]);
     game_objects_.push_back(new GameObject(glm::vec3(0.0f, 0.0f, -0.1f), sprite_, &sprite_shader_, tex_[7]));
     game_objects_[1]->SetParent(game_objects_[0]);
@@ -150,11 +150,13 @@ void Game::Setup(void)
 
     // Setup other objects
     int num_enemies = 2;
+    
     for (int i = 0; i < num_enemies; i++) {
         RedBloodEnemy* newEnemy = new RedBloodEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[2]);
         newEnemy->setTarget(players[0]);
         game_objects_.push_back(newEnemy);
     }
+    
 
     for (int i = 0; i < num_enemies; i++) {
         WhiteBloodEnemy* newEnemy = new WhiteBloodEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[1]);
@@ -163,14 +165,14 @@ void Game::Setup(void)
         game_objects_.push_back(newEnemy);
     }
     
-
+    
     for (int i = 0; i < num_enemies; i++) {
         StemCellEnemy* newEnemy = new StemCellEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[4]);
         newEnemy->setTarget(players[0]);
         newEnemy->init(sprite_, &tex_[6], &sprite_shader_, this);
         game_objects_.push_back(newEnemy);
     }
-
+    
     for (int i = 0; i < 4; i++) {
         GameObject* newObj = new CollectibleGameObject(glm::vec3(randF(-4.0, 4.0), randF(-4.0, 4.0), 0.0f), sprite_, &sprite_shader_, tex_[10]);
         newObj->setType(GameObject::Bacteria);

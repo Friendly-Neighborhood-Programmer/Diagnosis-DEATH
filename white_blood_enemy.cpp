@@ -37,7 +37,7 @@ namespace game {
             if (distance < 4.0f) {
                 state = Attacking;
             }
-            if (distance < 1.8f) {
+            if (distance < 2.5f) {
                 state = Running;
             }
 
