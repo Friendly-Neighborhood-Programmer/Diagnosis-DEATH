@@ -22,6 +22,9 @@ namespace game {
         GameObject::Update(delta_time);
     }
 
+    BulletGameObject::BulletType BulletGameObject::getBulletType() {
+        return bType;
+    }
     void BulletGameObject::setSpeed(float s) { speed = s; }
     float BulletGameObject::getSpeed() { return speed; }
 

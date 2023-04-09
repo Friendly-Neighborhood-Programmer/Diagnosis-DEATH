@@ -32,6 +32,8 @@ namespace game {
             // Run the game (keep the game active)
             void MainLoop(void); 
 
+            void addGameObject(GameObject*);
+
         private:
             // Main window: pointer to the GLFW window structure
             GLFWwindow *window_;

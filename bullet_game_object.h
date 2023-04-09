@@ -13,9 +13,9 @@ namespace game {
 
             // Update function for moving the player object around
             void Update(double delta_time) override;
-            enum BulletType{Generic, Player};
+            enum BulletType{Generic, Player, Enemy};
             BulletType bType;
-
+            BulletType getBulletType();
             float getSpeed();
             void setSpeed(float);
     protected:

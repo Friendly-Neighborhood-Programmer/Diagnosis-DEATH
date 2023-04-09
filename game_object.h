@@ -35,6 +35,9 @@ namespace game {
             virtual void die();
 
             virtual void takeDamage(int);
+            virtual int dealDamage();
+            bool getHitsEnemies();
+            bool getHitsPlayers();
 
             // Getters
             inline glm::vec3& GetPosition(void) { return position_; }
@@ -85,6 +88,8 @@ namespace game {
     private:
 
         protected:
+            bool hitsEnemies;
+            bool hitsPlayers;
             //proporties
             float maxVelocity_;
             bool accelerating;

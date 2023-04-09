@@ -9,6 +9,8 @@ namespace game {
 GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture) 
 {
     // Initialize all attributes
+    hitsPlayers = false;
+    hitsEnemies = false;
     position_ = startPos = position;
     scale_ = 1.0;
     angle_ = 0.0;
@@ -29,6 +31,8 @@ GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader
     cooldown = 0.7f;
 }
 
+bool GameObject::getHitsEnemies() { return hitsEnemies; }
+bool GameObject::getHitsPlayers() { return hitsPlayers; }
 
 glm::vec3 GameObject::GetBearing(void) {
 
@@ -38,6 +42,9 @@ glm::vec3 GameObject::GetBearing(void) {
     return dir;
 }
 
+int GameObject::dealDamage() {
+    return damage;
+}
 
 glm::vec3 GameObject::GetRight(void) {
 

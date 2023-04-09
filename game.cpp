@@ -6,15 +6,17 @@
 #include <iostream>
 
 #include <path_config.h>
-
+#include "stem_cell_enemy.h"
+#include "red_blood_enemy.h"
+#include "white_blood_enemy.h"
 #include "sprite.h"
 #include "particles.h"
 #include "trail_particles.h"
 #include "explosion_particles.h"
 #include "shader.h"
 #include "player_game_object.h"
-#include "enemy_game_object.h"
-#include "bullet_game_object.h"
+
+#include "enemy_bullet_game_object.h"
 #include "player_bullet_game_object.h"
 #include "particle_system.h"
 #include "explosion_particle_system.h"
@@ -34,8 +36,8 @@ namespace game {
 
 // Globals that define the OpenGL window and viewport
 const char *window_title_g = "Final Project";
-const unsigned int window_width_g = 800;
-const unsigned int window_height_g = 600;
+const unsigned int window_width_g = 1280; //800
+const unsigned int window_height_g = 960; //600
 const glm::vec3 viewport_background_color_g(0.0, 0.0, 1.0);
 
 // Directory with game resources such as textures
@@ -148,9 +150,26 @@ void Game::Setup(void)
     game_objects_[1]->setType(GameObject::Blade);
 
     // Setup other objects
-    int num_enemies = 10;
+    int num_enemies = 2;
     for (int i = 0; i < num_enemies; i++) {
-        game_objects_.push_back(new EnemyGameObject(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[2]));
+        RedBloodEnemy* newEnemy = new RedBloodEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[2]);
+        newEnemy->setTarget(players[0]);
+        game_objects_.push_back(newEnemy);
+    }
+
+    /*
+    for (int i = 0; i < num_enemies; i++) {
+        WhiteBloodEnemy* newEnemy = new WhiteBloodEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[1]);
+        newEnemy->setTarget(players[0]);
+        game_objects_.push_back(newEnemy);
+    }
+    */
+
+    for (int i = 0; i < num_enemies; i++) {
+        StemCellEnemy* newEnemy = new StemCellEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[4]);
+        newEnemy->setTarget(players[0]);
+        newEnemy->init(sprite_, &tex_[6], &sprite_shader_, this);
+        game_objects_.push_back(newEnemy);
     }
 
     for (int i = 0; i < 4; i++) {
@@ -271,6 +290,9 @@ void Game::MainLoop(void)
     }
 }
 
+void Game::addGameObject(GameObject* go) {
+    game_objects_.insert(game_objects_.begin() + 4, go);
+}
 
 void Game::Update(glm::mat4 view_matrix, double delta_time)
 {
@@ -278,7 +300,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
     // Update time
     current_time_ += delta_time;
 
-    if (germActivated) {
+    if (germActivated && players[0] != nullptr) {
         if (current_time_ > germTimer) {
             for (int i = 1; i < NUM_PLAYERS; i++) {
                 if (players[i] != nullptr) {
@@ -431,14 +453,26 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                     continue;
                 }
 
-                if ((current_game_object->getType() == GameObject::Bullet || other_game_object->getType() == GameObject::Bullet) && 
+                if (((current_game_object->getType() == GameObject::Bullet && current_game_object->getHitsEnemies()) || (other_game_object->getType() == GameObject::Bullet && other_game_object->getHitsEnemies())) &&
                     (current_game_object->getType() == GameObject::Enemy || other_game_object->getType() == GameObject::Enemy)) {
                     if (other_game_object->getType() == GameObject::Enemy) {
-                        other_game_object->takeDamage(current_game_object->getDamage());
+                        other_game_object->takeDamage(current_game_object->dealDamage());
                         current_game_object->die();
                     }
                     else {
-                        current_game_object->takeDamage(other_game_object->getDamage());
+                        current_game_object->takeDamage(other_game_object->dealDamage());
+                        other_game_object->die();
+                    }
+                }
+
+                if (((current_game_object->getType() == GameObject::Bullet && current_game_object->getHitsPlayers()) || (other_game_object->getType() == GameObject::Bullet && other_game_object->getHitsPlayers())) &&
+                    (current_game_object->getType() == GameObject::Player || other_game_object->getType() == GameObject::Player)) {
+                    if (other_game_object->getType() == GameObject::Player) {
+                        other_game_object->takeDamage(current_game_object->dealDamage());
+                        current_game_object->die();
+                    }
+                    else {
+                        current_game_object->takeDamage(other_game_object->dealDamage());
                         other_game_object->die();
                     }
                 }
@@ -455,16 +489,20 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                         current_game_object->takeDamage(current_game_object->getMaxHealth());
                         other_game_object->takeDamage(current_game_object->getDamage());
                     }
-                    for (int i = 0; i < NUM_PLAYERS; i++) {
-                        if (players[i] != nullptr) {
-                            if (players[i]->GetState() == GameObject::Died) {
-                                players[i] = nullptr;
-                            }
+                }
+                for (int i = 0; i < NUM_PLAYERS; i++) {
+                    if (players[i] != nullptr) {
+                        if (players[i]->GetState() == GameObject::Died) {
+                            players[i] = nullptr;
                         }
                     }
-                    if (players[1] == nullptr && players[2] == nullptr) {
-                        germActivated = false;
-                    }
+                }
+                if (players[1] == nullptr && players[2] == nullptr) {
+                    germActivated = false;
+                }
+                if (players[0] == nullptr) {
+                    cout << "GAME OVER." << endl;
+                    glfwSetWindowShouldClose(window_, true);
                 }
 
                 /*
