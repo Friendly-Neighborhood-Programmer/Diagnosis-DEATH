@@ -24,7 +24,7 @@ namespace game {
         void setRadius(float);
 
     protected:
-
+        float speed;
         State state;
         // centre of the patrol circle
         glm::vec3 randPoint;

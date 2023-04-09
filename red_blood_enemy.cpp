@@ -1,6 +1,8 @@
 #include "red_blood_enemy.h"
-#define CHARGE_SPEED 3
 #include <iostream>
+#define CHARGE_SPEED 4
+#define PLAYER_RANGE 3
+#define START_CHARGE_RANGE 2
 
 
 namespace game {
@@ -9,6 +11,8 @@ namespace game {
         radius = 1.0f;
         attackTimer = -1.0;
         curHealth = 3;
+        speed = 1.4f;
+        damage = 1;
     }
 
     void RedBloodEnemy::Update(double delta_time) {
@@ -16,16 +20,19 @@ namespace game {
         //detect if player is close
         if (target != nullptr && state != Charge) {
             float distance = glm::length(position_ - target->GetPosition());
-            if (distance > 3.0f) {
+            if (distance > PLAYER_RANGE) {
+                //not close, so patrol
                 state = Patrolling;
             }
-            else if (distance < 2 || state == Attacking) {
+            //if in middle of attacking or need to start attacking
+            else if (distance < START_CHARGE_RANGE || state == Attacking) {
                 if (state != Attacking) {
                     startAttack();
                 }
                 state = Attacking;
             }
-            else if (distance < 3.0f) {
+            //else means walk towards player
+            else if (distance < PLAYER_RANGE) {
                 state = Moving;
             }
         }
@@ -37,6 +44,7 @@ namespace game {
         EnemyGameObject::Update(delta_time);
     }
 
+    //attack, meaning start charging
     void RedBloodEnemy::attack(double delta_time) {
         if (attackTimer <= time) {
             chargePoint = position_ - target->GetPosition();
@@ -44,18 +52,21 @@ namespace game {
         }
     }
 
+    //move towards player, with a little randomness
     void RedBloodEnemy::move(double delta_time) {
-        position_ -= glm::normalize((position_ - (target->GetPosition() * glm::vec3(2, 2, 1)))) * ((float)delta_time);
+        position_ -= glm::normalize((position_ - ((target->GetPosition() * glm::vec3(2, 2, 1) + glm::vec3(randF(-1.0f, 1.0f), randF(-1.0f, 1.0f), 0))))) * ((float)delta_time) * speed;
     }
 
+    //charge towards charge point, which is players position 1.2 seconds ago
     void RedBloodEnemy::charge(double delta_time) {
         position_ -= glm::normalize((chargePoint)) * ((float)delta_time) * glm::vec3(CHARGE_SPEED, CHARGE_SPEED, 0);
         if ((attackTimer + 1) <= time) {
-            //stop charging
+            //stop charging after 1 second
             state = Patrolling;
         }
     }
 
+    //will start charging towards point in 1.2 seconds
     void RedBloodEnemy::startAttack() {
         attackTimer = time + 1.2;
     }

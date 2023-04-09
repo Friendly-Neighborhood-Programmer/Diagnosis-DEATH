@@ -15,6 +15,7 @@ namespace game {
         hitsEnemies = false;
         hitsPlayers = true;
         moveTimer = 0;
+        speed = 1;
     }
 
     int EnemyGameObject::dealDamage() {
@@ -49,16 +50,16 @@ namespace game {
     }
 
     void EnemyGameObject::run(double delta_time) {
-        position_ -= (target->GetPosition() - position_) * ((float)delta_time);
+        position_ -= (target->GetPosition() - position_) * ((float)delta_time) * speed;
     }
 
     void EnemyGameObject::patrol(double delta_time) {
         if (moveTimer <= time) {
             randPoint = glm::vec3(randF(-10.0f, 10.0f), randF(-10.0f, 10.0f), 0.0f);
             randPoint = glm::normalize(randPoint);
-            moveTimer = time + 2;
+            moveTimer = time + 2 + randF(-1.0f, 1.0f);
         }
-        position_ -= randPoint * (float)delta_time;
+        position_ -= randPoint * (float)delta_time * speed;
     }
 
     void EnemyGameObject::setTarget(GameObject* g) {

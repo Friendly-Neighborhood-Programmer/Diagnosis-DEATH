@@ -24,8 +24,7 @@
 #include "collectible_game_object.h"
 
 #define GERM_INTERVAL 30
-#define CLONE_HEALTH 3
-#define PLAYER_START_HEALTH 5
+#define PLAYER_START_HEALTH 7
 
 using namespace std;
 
@@ -36,8 +35,8 @@ namespace game {
 
 // Globals that define the OpenGL window and viewport
 const char *window_title_g = "Final Project";
-const unsigned int window_width_g = 1280; //800
-const unsigned int window_height_g = 960; //600
+const unsigned int window_width_g = 800; //1280; //800
+const unsigned int window_height_g = 600; //960; //600
 const glm::vec3 viewport_background_color_g(0.0, 0.0, 1.0);
 
 // Directory with game resources such as textures
@@ -157,13 +156,13 @@ void Game::Setup(void)
         game_objects_.push_back(newEnemy);
     }
 
-    /*
     for (int i = 0; i < num_enemies; i++) {
         WhiteBloodEnemy* newEnemy = new WhiteBloodEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[1]);
         newEnemy->setTarget(players[0]);
+        newEnemy->init(sprite_, &tex_[6], &sprite_shader_, this);
         game_objects_.push_back(newEnemy);
     }
-    */
+    
 
     for (int i = 0; i < num_enemies; i++) {
         StemCellEnemy* newEnemy = new StemCellEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[4]);
@@ -339,10 +338,6 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
 
         // Check if game object already died
         if (current_game_object->GetState() == GameObject::Died) {
-            if (i == 0) {
-                cout << "GAME OVER." << endl;
-                glfwSetWindowShouldClose(window_, true);
-            }
             // Remove object from the list of objects
             game_objects_.erase(game_objects_.begin() + i);
             // Delete game object from memory
@@ -417,9 +412,11 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                         //IF NEED TWEAK ANY POWERUPS, IT'S ALL GONNA BE HERE
                         //(except for clone (germ) it has 3 constants up top)
                         case GameObject::Fat:
+                            //collect fat powerup, get more special bullets
                             players[0]->addBulletAmount(2);
                             break;
                         case GameObject::Germ:
+                            //collect germ powerup, spawns 2 clones for 30 seconds, mimics player movement, shoots with player
                             germActivated = true;
                             germTimer = current_time_ + GERM_INTERVAL;
                             for (int i = 1; i < NUM_PLAYERS; i++) {
@@ -430,14 +427,15 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                                     players[i] = new PlayerGameObject(players[0]->GetPosition() + (glm::vec3(-1.0f, 0.0f, 0.0f)), sprite_, &sprite_shader_, tex_[2]);
                                 else if(i == 2)
                                     players[i] = new PlayerGameObject(players[0]->GetPosition() + (glm::vec3(1.0f, 0.0f, 0.0f)), sprite_, &sprite_shader_, tex_[1]);
-                                players[i]->setMaxHealth(CLONE_HEALTH);
-                                players[i]->heal(CLONE_HEALTH);
+                                players[i]->setMaxHealth(players[0]->getMaxHealth()/2);
+                                players[i]->heal(players[0]->getMaxHealth() / 2);
                                 game_objects_.insert(game_objects_.begin() + 1, players[i]);
                             }
                             
 
                             break;
                         case GameObject::Bacteria:
+                            //collect bacteria powerup, gives size, max hp, damage, zooms out camera
                             players[0]->SetScale(players[0]->GetScale() + 0.15f);
                             players[0]->setMaxHealth(players[0]->getMaxHealth() + 1);
                             players[0]->heal(1);
@@ -454,40 +452,42 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                     continue;
                 }
 
+                GameObject* bullet = nullptr;
+                GameObject* enemy = nullptr;
+
                 if (((current_game_object->getType() == GameObject::Bullet && current_game_object->getHitsEnemies()) || (other_game_object->getType() == GameObject::Bullet && other_game_object->getHitsEnemies())) &&
                     (current_game_object->getType() == GameObject::Enemy || other_game_object->getType() == GameObject::Enemy)) {
-                    GameObject* bullet;
-                    GameObject* enemy;
                     if (other_game_object->getType() == GameObject::Enemy) {
-                        other_game_object->takeDamage(current_game_object->dealDamage());
-                        current_game_object->die();
-                    }
-                    else {
-                        current_game_object->takeDamage(other_game_object->dealDamage());
-                        other_game_object->die();
-                    }
-                }
-
-                if (((current_game_object->getType() == GameObject::Bullet && current_game_object->getHitsPlayers()) || (other_game_object->getType() == GameObject::Bullet && other_game_object->getHitsPlayers())) &&
-                    (current_game_object->getType() == GameObject::Player || other_game_object->getType() == GameObject::Player)) {
-                    if (other_game_object->getType() == GameObject::Player) {
-                        other_game_object->takeDamage(current_game_object->dealDamage());
-                        current_game_object->die();
-                    }
-                    else {
-                        current_game_object->takeDamage(other_game_object->dealDamage());
-                        other_game_object->die();
-                        bullet = current_game_object;
                         enemy = other_game_object;
+                        bullet = current_game_object;
                     }
                     else {
                         bullet = other_game_object;
                         enemy = current_game_object;
                     }
+                }
+                
+
+                if (((current_game_object->getType() == GameObject::Bullet && current_game_object->getHitsPlayers()) || (other_game_object->getType() == GameObject::Bullet && other_game_object->getHitsPlayers())) &&
+                    (current_game_object->getType() == GameObject::Player || other_game_object->getType() == GameObject::Player)) {
+                    if (other_game_object->getType() == GameObject::Player) {
+                        //other_game_object->takeDamage(current_game_object->dealDamage());
+                        //current_game_object->die();
+                        enemy = other_game_object;
+                        bullet = current_game_object;
+                    }
+                    else {
+                        //current_game_object->takeDamage(other_game_object->dealDamage());
+                        //other_game_object->die();
+                        bullet = other_game_object;
+                        enemy = current_game_object;
+                    }
+                }
+                if (bullet != nullptr){
                     if (bullet->GetState() != GameObject::DyingBullet) { //if the bullet has not already struck somthing
-                        enemy->takeDamage(bullet->getDamage());
+                        enemy->takeDamage(bullet->dealDamage());
                         bullet->Explode(tex_[11]);
-                        bullet->die();                       
+                        bullet->die();
                         GameObject* explosion1 = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], bullet);
                         explosion1->SetScale(0.08);
                         game_objects_.push_back(explosion1);
@@ -497,14 +497,14 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                 if ((current_game_object->getType() == GameObject::Player || other_game_object->getType() == GameObject::Player) &&
                     (current_game_object->getType() == GameObject::Enemy || other_game_object->getType() == GameObject::Enemy)) {
                     if (other_game_object->getType() == GameObject::Enemy) {
-                        //insta-kill enemy for now
-                        other_game_object->takeDamage(other_game_object->getMaxHealth());
-                        current_game_object->takeDamage(other_game_object->getDamage());  
+                        //melee hit
+                        other_game_object->takeDamage(current_game_object->dealDamage());
+                        current_game_object->takeDamage(other_game_object->dealDamage());  
                     }
                     else {
-                        //insta-kill enemy for now
-                        current_game_object->takeDamage(current_game_object->getMaxHealth());
-                        other_game_object->takeDamage(current_game_object->getDamage());
+                        //melee hit
+                        current_game_object->takeDamage(other_game_object->dealDamage());
+                        other_game_object->takeDamage(current_game_object->dealDamage());
                     }
                 }
                 for (int i = 0; i < NUM_PLAYERS; i++) {

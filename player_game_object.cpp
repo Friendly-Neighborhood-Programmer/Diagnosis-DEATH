@@ -14,11 +14,12 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
     oType = Player;
     maxVelocity_ = 5;
     spiralShotAmt = 15;
+    damageTimer = 0;
 }
 
 // Update function for moving the player object around
 void PlayerGameObject::Update(double delta_time) {
-
+    time += delta_time;
     // TODO MAKE FEEL BETTER, TWEEK VALUES
     if (glm::length(velocity_) > 2.0f) {
         velocity_ -= velocity_ * 1.75f * glm::vec3(delta_time);
@@ -34,7 +35,16 @@ void PlayerGameObject::Update(double delta_time) {
 
 BulletGameObject* PlayerGameObject::shoot(Geometry* sprite, Shader* shader, GLuint texture) {
     BulletGameObject* bullet = new PlayerBulletGameObject(position_, angle_, GetBearing(), sprite, shader, texture);
+    bullet->setDamage(getDamage());
     return bullet;
+}
+
+int PlayerGameObject::dealDamage() {
+    if (damageTimer <= time) {
+        damageTimer = time + 0.75;
+        return damage;
+    }
+    return 0;
 }
 
 vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, Shader* shader, GLuint texture) {
@@ -48,8 +58,8 @@ vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, 
         angle = (glm::atan(direction.y / direction.x));
         angle += (glm::pi<float>() / 2); //TODO, FIX ANGLE ISSHUE
         angle = glm::abs(angle);
-        std::cout << angle << std::endl;
         PlayerBulletGameObject* bullet = new PlayerBulletGameObject(position_, angle, direction, sprite, shader, texture);
+        bullet->setDamage(getDamage());
         
         //add to vector
 

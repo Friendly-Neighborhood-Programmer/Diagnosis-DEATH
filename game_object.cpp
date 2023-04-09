@@ -209,6 +209,9 @@ void GameObject::setAccelerating(bool acc) {
 }
 
 void GameObject::takeDamage(int dmg) {
+    if (oType == Player) {
+        std::cout << "Player health goes from " << curHealth << "/" << maxHealth << " to: " << curHealth-dmg << "/" << maxHealth << std::endl;
+    }
     curHealth -= dmg;
     if (curHealth <= 0) {
         die();
