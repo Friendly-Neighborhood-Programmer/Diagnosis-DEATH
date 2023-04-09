@@ -1,5 +1,5 @@
 #include "bullet_game_object.h"
-
+#include <iostream>
 namespace game {
 
     /*
@@ -24,5 +24,14 @@ namespace game {
 
     void BulletGameObject::setSpeed(float s) { speed = s; }
     float BulletGameObject::getSpeed() { return speed; }
+    void BulletGameObject::die() { bulletDie(); }
+    void BulletGameObject::bulletDie() { 
+        state_ = DyingBullet; 
+        speed *= 0.1;
+        SetVelocity(GetVelocity() * speed);
+        if (particle != nullptr) {
+            particle->die();
+        }
+    }
 
 } // namespace game

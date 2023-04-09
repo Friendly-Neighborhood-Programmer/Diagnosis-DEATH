@@ -17,7 +17,7 @@ ExplosionParticleSystem::ExplosionParticleSystem(const glm::vec3 &position, Geom
 void ExplosionParticleSystem::Update(double delta_time) {
     timeActive += delta_time;
 
-    if (timeActive >= 1.5f) { state_ = Died;  }
+    if (timeActive >= 0.5f) { state_ = Died;  }
 
 	// Call the parent's update method to move the object in standard way, if desired
 	GameObject::Update(delta_time);

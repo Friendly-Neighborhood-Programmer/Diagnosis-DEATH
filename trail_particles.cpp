@@ -35,12 +35,12 @@ void TrailParticles::CreateGeometry(void)
     };
 
     // Initialize all the particle vertices
-    GLfloat particles[NUM_PARTICLES * vertex_attr];
+    GLfloat particles[NUM_TRAIL_PARTICALS * vertex_attr];
     float theta, r, tmod;
     float pi = glm::pi<float>();
     float two_pi = 2.0f*pi;
 
-    for (int i = 0; i < NUM_PARTICLES; i++){
+    for (int i = 0; i < NUM_TRAIL_PARTICALS; i++){
         // Check if we are initializing a new particle
         //
         // A particle has four vertices, so every four vertices we need
@@ -49,7 +49,7 @@ void TrailParticles::CreateGeometry(void)
             // Get three random values
             //theta = (two_pi*(rand() % 1000) / 1000.0f);
             theta = (2.0*(rand() % 10000) / 10000.0f -1.0f)*0.05f + pi;
-            r = 4.0f + 0.8*(rand() % 10000) / 10000.0f;
+            r = 1.0f + 0.8*(rand() % 10000) / 10000.0f;
             tmod = (rand() % 10000) / 10000.0f;
         }
 
@@ -70,9 +70,9 @@ void TrailParticles::CreateGeometry(void)
     }
 
     // Initialize all the particle faces
-    GLuint manyfaces[NUM_PARTICLES * 6];
+    GLuint manyfaces[NUM_TRAIL_PARTICALS * 6];
 
-    for (int i = 0; i < NUM_PARTICLES; i++) {
+    for (int i = 0; i < NUM_TRAIL_PARTICALS; i++) {
         for (int j = 0; j < 6; j++){
             manyfaces[i * 6 + j] = face[j] + i * 4;
         }

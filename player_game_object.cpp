@@ -46,10 +46,15 @@ vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, 
         direction.y = glm::sin((float)i);
         direction = glm::normalize(direction);
         angle = (glm::atan(direction.y / direction.x));
-        angle += (glm::pi<float>() / 2); //Uneeded, but might be useful later
+        angle += (glm::pi<float>() / 2); //TODO, FIX ANGLE ISSHUE
+        angle = glm::abs(angle);
         std::cout << angle << std::endl;
         PlayerBulletGameObject* bullet = new PlayerBulletGameObject(position_, angle, direction, sprite, shader, texture);
+        
+        //add to vector
+
         bullets.push_back(bullet);
+
     }
     return bullets;
 }

@@ -19,8 +19,8 @@ out vec2 uv_interp;
 void main()
 {
     vec4 pos; // Vertex position
-    float cycle = 3.0; // Duration of cycle in seconds
-    float speed = 20.0; // Speed adjustment constant
+    float cycle = 0.5; // Duration of cycle in seconds
+    float speed = 60.0; // Speed adjustment constant
     float gravity = 2.8; // Gravity in this world
     float acttime = time ; // do not cycle
 
