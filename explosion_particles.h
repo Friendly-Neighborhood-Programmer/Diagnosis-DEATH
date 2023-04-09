@@ -2,6 +2,7 @@
 #define EXPLOSION_PARTICLES_H_
 
 #include "particles.h"
+#define NUM_EXPLOSION_PARTICALS 500
 
 namespace game {
 

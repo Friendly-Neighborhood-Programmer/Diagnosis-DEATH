@@ -143,7 +143,7 @@ void GameObject::Update(double delta_time) {
 
 
 void GameObject::Render(glm::mat4 view_matrix, double current_time){
-
+    if (state_ == DyingBullet) return; //if dying bullet, dont render
     // Set up the shader
     shader_->Enable();
 

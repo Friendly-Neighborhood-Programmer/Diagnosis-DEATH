@@ -183,7 +183,7 @@ void Game::Setup(void)
     for (int i = 0; i < 4; i++) {
         GameObject* newObj = new CollectibleGameObject(glm::vec3(randF(-4.0, 4.0), randF(-4.0, 4.0), 0.0f), sprite_, &sprite_shader_, tex_[9]);
         newObj->setType(GameObject::Fat);
-        newObj->SetScale(0.25f);
+        newObj->SetScale(0.5f);
 
         game_objects_.push_back(newObj);
     }
@@ -254,6 +254,7 @@ void Game::SetAllTextures(void)
     SetTexture(tex_[8], (resources_directory_g + std::string("/textures/germ_powerup.png")).c_str());
     SetTexture(tex_[9], (resources_directory_g + std::string("/textures/fat_powerup.png")).c_str());
     SetTexture(tex_[10], (resources_directory_g + std::string("/textures/bacteria_powerup.png")).c_str());
+    SetTexture(tex_[11], (resources_directory_g + std::string("/textures/Empty.png")).c_str());
     glBindTexture(GL_TEXTURE_2D, tex_[0]);
 }
 
@@ -455,6 +456,8 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
 
                 if (((current_game_object->getType() == GameObject::Bullet && current_game_object->getHitsEnemies()) || (other_game_object->getType() == GameObject::Bullet && other_game_object->getHitsEnemies())) &&
                     (current_game_object->getType() == GameObject::Enemy || other_game_object->getType() == GameObject::Enemy)) {
+                    GameObject* bullet;
+                    GameObject* enemy;
                     if (other_game_object->getType() == GameObject::Enemy) {
                         other_game_object->takeDamage(current_game_object->dealDamage());
                         current_game_object->die();
@@ -474,6 +477,20 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                     else {
                         current_game_object->takeDamage(other_game_object->dealDamage());
                         other_game_object->die();
+                        bullet = current_game_object;
+                        enemy = other_game_object;
+                    }
+                    else {
+                        bullet = other_game_object;
+                        enemy = current_game_object;
+                    }
+                    if (bullet->GetState() != GameObject::DyingBullet) { //if the bullet has not already struck somthing
+                        enemy->takeDamage(bullet->getDamage());
+                        bullet->Explode(tex_[11]);
+                        bullet->die();                       
+                        GameObject* explosion1 = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], bullet);
+                        explosion1->SetScale(0.08);
+                        game_objects_.push_back(explosion1);
                     }
                 }
 
@@ -570,12 +587,12 @@ void Game::Controls(double delta_time)
                 }
                 GameObject* bullet = player->shoot(sprite_, &sprite_shader_, tex_[6]);
                 game_objects_.push_back(bullet);
-
+                // TRAIL PARTICALS
                 GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullet);
                 particles->SetScale(0.08);
                 game_objects_.push_back(particles);
-
                 bullet->setChildParticle(particles);
+                
             }
         }
     }
@@ -587,6 +604,13 @@ void Game::Controls(double delta_time)
                     break;
                 }
                 vector<PlayerBulletGameObject*> bullets = player->spiralShoot(sprite_, &sprite_shader_, tex_[6]);
+                for (int i = 0; i < bullets.size(); i++) { //perform things on the bullets in the vector
+                    // TRAIL PARTICALS
+                    GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullets[i]);
+                    particles->SetScale(0.08);
+                    game_objects_.push_back(particles);
+                    bullets[i]->setChildParticle(particles);
+                }
                 game_objects_.insert(game_objects_.end(), bullets.begin(), bullets.end());
             }
         }

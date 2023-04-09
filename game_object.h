@@ -18,7 +18,7 @@ namespace game {
     class GameObject {
 
         public:
-            enum State { Active, Exploded, Died };
+            enum State { Active, Exploded, Died, DyingBullet };
 
             //KEEP COLLECTIBLE AND ON AS THE LAST 4 IN THIS ENUM
             enum ObjectType { Player, Enemy, Bullet, Particles, Blade, Collectible, Bacteria, Fat, Germ};
@@ -65,6 +65,7 @@ namespace game {
             void setMaxHealth(int newHealth) { maxHealth = newHealth; if (maxHealth > curHealth) curHealth = maxHealth; }
             int getMaxHealth() { return maxHealth; }
             virtual void setChildParticle(GameObject* newP) { particle = newP; };
+            virtual GameObject* getChildParticle() { return particle; };
             virtual void setBullet(GameObject* newBullet) { bullet = newBullet; }
 
             virtual void SetVelocity(const glm::vec3& velocity);

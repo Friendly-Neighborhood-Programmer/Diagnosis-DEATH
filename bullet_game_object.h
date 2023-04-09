@@ -18,6 +18,8 @@ namespace game {
             BulletType getBulletType();
             float getSpeed();
             void setSpeed(float);
+            virtual void die();
+            void bulletDie();
     protected:
         float speed;
         

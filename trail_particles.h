@@ -2,6 +2,7 @@
 #define TRAIL_PARTICLES_H_
 
 #include "particles.h"
+#define NUM_TRAIL_PARTICALS 100
 
 namespace game {
 
