@@ -49,23 +49,18 @@ int PlayerGameObject::dealDamage() {
 
 vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, Shader* shader, GLuint texture) {
     vector<PlayerBulletGameObject*> bullets;
-    glm::vec3 direction = glm::vec3(0);
-    float angle = angle_;
+
     for (int i = 0; i < spiralShotAmt; i++) {
-        direction.x = glm::cos((float)i);
-        direction.y = glm::sin((float)i);
-        direction = glm::normalize(direction);
-        angle = (glm::atan(direction.y / direction.x));
-        angle += (glm::pi<float>() / 2); //TODO, FIX ANGLE ISSHUE
-        angle = glm::abs(angle);
-        PlayerBulletGameObject* bullet = new PlayerBulletGameObject(position_, angle, direction, sprite, shader, texture);
+        float angle = angle_ + glm::radians(360.f / spiralShotAmt * i);
+        glm::vec3 dir = glm::vec3(glm::cos(angle), glm::sin(angle), 0);
+
+        PlayerBulletGameObject* bullet = new PlayerBulletGameObject(position_, angle-glm::radians(90.f), dir, sprite, shader, texture);
         bullet->setDamage(getDamage());
         
-        //add to vector
-
+        //add to collection of all bullets
         bullets.push_back(bullet);
-
     }
+
     return bullets;
 }
 } // namespace game

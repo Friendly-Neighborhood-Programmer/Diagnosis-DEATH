@@ -35,8 +35,8 @@ namespace game {
 
 // Globals that define the OpenGL window and viewport
 const char *window_title_g = "Final Project";
-const unsigned int window_width_g = 800; //1280; //800
-const unsigned int window_height_g = 600; //960; //600
+const unsigned int window_width_g = 900; //1280; //800
+const unsigned int window_height_g = 900; //960; //600
 const glm::vec3 viewport_background_color_g(0.0, 0.0, 1.0);
 
 // Directory with game resources such as textures

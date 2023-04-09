@@ -43,15 +43,10 @@ namespace game {
     //shoot bullets in a circle
     void StemCellEnemy::attack(double delta_time) {
         if(attackTimer <= time){
-            glm::vec3 direction = glm::vec3(0);
-            float angle = angle_;
             for (int i = 0; i < NUM_BULLETS; i++) {
-                direction.x = glm::cos((float)i);
-                direction.y = glm::sin((float)i);
-                direction = glm::normalize(direction);
-                angle = (glm::atan(direction.y / direction.x));
-                angle += (glm::pi<float>() / 2); //Uneeded, but might be useful later
-                EnemyBulletGameObject* bullet = new EnemyBulletGameObject(position_, angle, direction, bulletSprite, bulletShader, *bulletTexture);
+                float angle = angle_ + glm::radians(360.f / NUM_BULLETS * i);
+                glm::vec3 dir = glm::vec3(glm::cos(angle), glm::sin(angle), 0);
+                EnemyBulletGameObject* bullet = new EnemyBulletGameObject(position_, angle-glm::radians(90.f), dir, bulletSprite, bulletShader, *bulletTexture);
                 bullet->setDamage(getDamage());
                 game->addGameObject(bullet);
             }
