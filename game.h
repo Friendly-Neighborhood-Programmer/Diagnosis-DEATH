@@ -9,6 +9,7 @@
 #include "shader.h"
 #include "game_object.h"
 #include "player_game_object.h"
+#include "text_game_object.h"
 
 #define NUM_PLAYERS 3
 
@@ -54,11 +55,14 @@ namespace game {
             Shader trail_particle_shader_;
             Shader explosion_particle_shader_;
 
+            // Shader for rendering text
+            Shader text_shader_;
+
             float germTimer;
             bool germActivated;
 
             // References to textures
-#define NUM_TEXTURES 12
+#define NUM_TEXTURES 13
             GLuint tex_[NUM_TEXTURES];
 
             // List of game objects
@@ -86,6 +90,14 @@ namespace game {
 
             //new stuff
             PlayerGameObject* players[NUM_PLAYERS];
+
+            //UI stuff
+            void adjustUiElts(glm::vec3 scalar);
+            void setTimer(double time);
+            std::vector<TextGameObject*> UI_objects_;
+            TextGameObject* healthText;
+            TextGameObject* timerText;
+            TextGameObject* SSText;
 
     }; // class Game
 

@@ -117,6 +117,11 @@ void Shader::SetUniformMat4(const GLchar *name, const glm::mat4 &matrix)
     glUniformMatrix4fv(glGetUniformLocation(shader_program_, name), 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
+void Shader::SetUniformIntArray(const GLchar* name, int len, const GLint* data)
+{
+
+    glUniform1iv(glGetUniformLocation(shader_program_, name), len, data);
+}
 
 Shader::~Shader() 
 {

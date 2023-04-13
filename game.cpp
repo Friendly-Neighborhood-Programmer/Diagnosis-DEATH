@@ -23,6 +23,8 @@
 #include "game.h"
 #include "collectible_game_object.h"
 
+#include "text_game_object.h"
+
 #define GERM_INTERVAL 30
 #define PLAYER_START_HEALTH 10
 
@@ -111,6 +113,9 @@ void Game::Init(void)
     // Initialize sprite shader
     sprite_shader_.Init((resources_directory_g+std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g+std::string("/sprite_fragment_shader.glsl")).c_str());
 
+    // Initialize text shader
+    text_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/text_fragment_shader.glsl")).c_str());
+
     // Initialize time
     current_time_ = 0.0;
 }
@@ -142,6 +147,7 @@ void Game::Setup(void)
     // Setup the player object (position, texture, vertex count)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
     players[0] = new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[0]);
+    players[0]->setIsMainPlayer(true);
     players[0]->setMaxHealth(PLAYER_START_HEALTH);
     game_objects_.push_back(players[0]);
     game_objects_.push_back(new GameObject(glm::vec3(0.0f, 0.0f, -0.1f), sprite_, &sprite_shader_, tex_[7]));
@@ -196,6 +202,27 @@ void Game::Setup(void)
 
         game_objects_.push_back(newObj);
     }
+
+
+    // Set up text objs: health, text, and special bullet counters
+    healthText = new TextGameObject(glm::vec3(-3.2f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
+    healthText->SetScale(1.0f);
+    healthText->SetText("Health: "+to_string(players[0]->getHealth()));
+    UI_objects_.push_back(healthText);
+    game_objects_.push_back(healthText);
+
+    timerText = new TextGameObject(glm::vec3(0.0f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
+    timerText->SetScale(1.0f);
+    timerText->SetText("0:00:00:00");
+    UI_objects_.push_back(timerText);
+    game_objects_.push_back(timerText);
+
+    SSText = new TextGameObject(glm::vec3(3.2f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
+    SSText->SetScale(1.0f);
+    SSText->SetText("SS: "+to_string(players[0]->getBulletAmount()));
+    UI_objects_.push_back(SSText);
+    game_objects_.push_back(SSText);
+    
 
     // Setup background
     // In this specific implementation, the background is always the
@@ -256,6 +283,7 @@ void Game::SetAllTextures(void)
     SetTexture(tex_[9], (resources_directory_g + std::string("/textures/fat_powerup.png")).c_str());
     SetTexture(tex_[10], (resources_directory_g + std::string("/textures/bacteria_powerup.png")).c_str());
     SetTexture(tex_[11], (resources_directory_g + std::string("/textures/Empty.png")).c_str());
+    SetTexture(tex_[12], (resources_directory_g + std::string("/textures/font.png")).c_str());
     glBindTexture(GL_TEXTURE_2D, tex_[0]);
 }
 
@@ -301,6 +329,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
 
     // Update time
     current_time_ += delta_time;
+    setTimer(current_time_);
 
     if (germActivated && players[0] != nullptr) {
         if (current_time_ > germTimer) {
@@ -404,7 +433,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
             */
 
             // If distance is below a threshold, we have a collision
-            if (distance < (0.65f) * current_game_object->GetScale()) {
+            if (distance < (0.65f) * current_game_object->GetScale() && !current_game_object->isUi() && !other_game_object->isUi()) {
                 // check collision of player with collectible
                 if (current_game_object->getType() == GameObject::Player && other_game_object->getType() >= GameObject::Collectible) {
                     other_game_object->die();
@@ -416,6 +445,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                         case GameObject::Fat:
                             //collect fat powerup, get more special bullets
                             players[0]->addBulletAmount(2);
+                            SSText->SetText("SS: " + to_string(players[0]->getBulletAmount())); //update the UI
                             break;
                         case GameObject::Germ:
                             //collect germ powerup, spawns 2 clones for 30 seconds, mimics player movement, shoots with player
@@ -443,6 +473,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                             players[0]->heal(1);
                             players[0]->setDamage(players[0]->getDamage() + 1);
                             camera_zoom -= 0.03f;
+                            adjustUiElts(glm::vec3(- 0.03f * 10));
                             break;
                         default:
                             break;
@@ -469,7 +500,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                     }
                 }
                 
-
+                //bullet stuff
                 if (((current_game_object->getType() == GameObject::Bullet && current_game_object->getHitsPlayers()) || (other_game_object->getType() == GameObject::Bullet && other_game_object->getHitsPlayers())) &&
                     (current_game_object->getType() == GameObject::Player || other_game_object->getType() == GameObject::Player)) {
                     if (other_game_object->getType() == GameObject::Player) {
@@ -488,6 +519,12 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                 if (bullet != nullptr){
                     if (bullet->GetState() != GameObject::DyingBullet) { //if the bullet has not already struck somthing
                         enemy->takeDamage(bullet->dealDamage());
+                        //for UI
+                        if (enemy->getIsMainPlayer()) { //if main player is getting hit
+                            cout << "Hit" << endl;
+                            healthText->SetText("Health: " + to_string(enemy->getHealth()));
+                        }
+
                         bullet->Explode(tex_[11]);
                         bullet->die();
                         GameObject* explosion1 = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], bullet);
@@ -599,7 +636,7 @@ void Game::Controls(double delta_time)
         }
     }
     if (glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        if (player->canShoot()) {
+        if (player->canShoot() && player->getBulletAmount() > 0) {
             for (int i = 0; i < NUM_PLAYERS; i++) {
                 PlayerGameObject* player = players[i];
                 if (player == nullptr) {
@@ -615,6 +652,7 @@ void Game::Controls(double delta_time)
                 }
                 game_objects_.insert(game_objects_.end(), bullets.begin(), bullets.end());
             }
+            SSText->SetText("SS: " + to_string(players[0]->getBulletAmount()));
         }
     }
     if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
@@ -628,8 +666,27 @@ void Game::Controls(double delta_time)
     }
 }
 
+void Game::adjustUiElts(glm::vec3 scalar) { //TODO KEEP UI CONSISTNET WITH CAMERA ZOOM and, once its in CAMERA MOVMENT
+    for (int i = 0; i < UI_objects_.size(); i++) {
+        //UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() * (glm::vec3(1) + (glm::vec3(-1) * scalar)));
+        //UI_objects_[i]->SetScale(UI_objects_[i]->GetScale() * (-1 * scalar.x));
+    }
+}
+
 float Game::randF(float min, float max) {
     return min + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (max - min)));
 }
        
+void Game::setTimer(double time) { // format: "0:00:00:00" as hour, minute, second, milasecond
+    int milaSecond = (time - floor(time)) * 100;
+    int t = time - (milaSecond/100);
+    int second = t % 60;
+    t -= second;
+    int minute = ((t/60) % 60);
+    t -= minute;
+    int hour = (t / 60) / 60;
+
+    timerText->SetText(to_string(hour)+":"+to_string(minute)+":"+to_string(second)+":"+to_string(milaSecond));
+   
+}
 } // namespace game

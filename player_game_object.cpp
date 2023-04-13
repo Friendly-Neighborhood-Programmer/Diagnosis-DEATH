@@ -13,7 +13,7 @@ PlayerGameObject::PlayerGameObject(const glm::vec3 &position, Geometry *geom, Sh
 	: GameObject(position, geom, shader, texture) {
     oType = Player;
     maxVelocity_ = 5;
-    spiralShotAmt = 15;
+    spiralShotAmt = 10;
     damageTimer = 0;
 }
 
@@ -48,6 +48,7 @@ int PlayerGameObject::dealDamage() {
 }
 
 vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, Shader* shader, GLuint texture) {
+    bulletAmount--;
     vector<PlayerBulletGameObject*> bullets;
 
     for (int i = 0; i < spiralShotAmt; i++) {

@@ -21,7 +21,7 @@ namespace game {
             enum State { Active, Exploded, Died, DyingBullet };
 
             //KEEP COLLECTIBLE AND ON AS THE LAST 4 IN THIS ENUM
-            enum ObjectType { Player, Enemy, Bullet, Particles, Blade, Collectible, Bacteria, Fat, Germ};
+            enum ObjectType { Player, Enemy, Bullet, Particles, Blade, Collectible, Bacteria, Fat, Germ, UI};
 
             // Constructor
             GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture);
@@ -64,6 +64,7 @@ namespace game {
             void setDamage(int amount) { damage = amount; }
             void setMaxHealth(int newHealth) { maxHealth = newHealth; if (maxHealth > curHealth) curHealth = maxHealth; }
             int getMaxHealth() { return maxHealth; }
+            int getHealth() { return curHealth; }
             virtual void setChildParticle(GameObject* newP) { particle = newP; };
             virtual GameObject* getChildParticle() { return particle; };
             virtual void setBullet(GameObject* newBullet) { bullet = newBullet; }
@@ -84,8 +85,11 @@ namespace game {
 
             void addBulletAmount(int amount) { bulletAmount += amount; }
             void removeBulletAmount(int amount) { bulletAmount -= amount; }
+            int getBulletAmount() { return bulletAmount; }
 
-
+            void setIsMainPlayer(bool mp) { isMainPlayer = mp; }
+            bool getIsMainPlayer() { return isMainPlayer; }
+            bool isUi() { return oType == UI; }
     private:
 
         protected:
@@ -117,7 +121,7 @@ namespace game {
 
             // added enum to identify the object type
             ObjectType oType;
-
+            bool isMainPlayer;
             // Cooldown for firing bullets
             float shotCooldown;
 

@@ -29,6 +29,7 @@ GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader
     bullet = nullptr;
     bulletAmount = 3;
     cooldown = 0.7f;
+    isMainPlayer = false;
 }
 
 bool GameObject::getHitsEnemies() { return hitsEnemies; }
@@ -210,7 +211,7 @@ void GameObject::setAccelerating(bool acc) {
 
 void GameObject::takeDamage(int dmg) {
     if (oType == Player) {
-        std::cout << "Player health goes from " << curHealth << "/" << maxHealth << " to: " << curHealth-dmg << "/" << maxHealth << std::endl;
+        //std::cout << "Player health goes from " << curHealth << "/" << maxHealth << " to: " << curHealth-dmg << "/" << maxHealth << std::endl;
     }
     curHealth -= dmg;
     if (curHealth <= 0) {

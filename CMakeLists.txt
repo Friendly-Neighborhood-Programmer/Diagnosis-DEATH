@@ -27,6 +27,7 @@ set(HDRS
 	red_blood_enemy.h
 	white_blood_enemy.h
 	enemy_bullet_game_object.h
+  text_game_object.h
 )
  
 set(SRCS
@@ -51,6 +52,7 @@ set(SRCS
 	red_blood_enemy.cpp
 	white_blood_enemy.cpp
 	enemy_bullet_game_object.cpp
+  text_game_object.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     particle_vertex_shader.glsl
@@ -59,7 +61,7 @@ set(SRCS
     trail_particle_fragment_shader.glsl
 	explosion_particle_vertex_shader.glsl
     explosion_particle_fragment_shader.glsl
-	
+  text_fragment_shader.glsl	
 )
 
 # Add path name to configuration file

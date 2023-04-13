@@ -18,7 +18,6 @@ namespace game {
             vector<PlayerBulletGameObject*> spiralShoot(Geometry* sprite, Shader* shader, GLuint texture);
             virtual int dealDamage();
             double time;
-
     protected:
         int spiralShotAmt;
         double damageTimer;
