@@ -207,7 +207,7 @@ void Game::Setup(void)
     // Set up text objs: health, text, and special bullet counters
     healthText = new TextGameObject(glm::vec3(-3.2f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
     healthText->SetScale(1.0f);
-    healthText->SetText("Health: "+to_string(players[0]->getHealth()));
+    healthText->SetText("Health: " + to_string(players[0]->getHealth()) + "/" + to_string(players[0]->getMaxHealth()));
     UI_objects_.push_back(healthText);
     game_objects_.push_back(healthText);
 
@@ -473,6 +473,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                             players[0]->heal(1);
                             players[0]->setDamage(players[0]->getDamage() + 1);
                             camera_zoom -= 0.03f;
+                            healthText->SetText("Health: " + to_string(players[0]->getHealth())+"/"+ to_string(players[0]->getMaxHealth()));
                             adjustUiElts(glm::vec3(- 0.03f * 10));
                             break;
                         default:
@@ -522,7 +523,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                         //for UI
                         if (enemy->getIsMainPlayer()) { //if main player is getting hit
                             cout << "Hit" << endl;
-                            healthText->SetText("Health: " + to_string(enemy->getHealth()));
+                            healthText->SetText("Health: " + to_string(enemy->getHealth()) + "/" + to_string(enemy->getMaxHealth()));
                         }
 
                         bullet->Explode(tex_[11]);
