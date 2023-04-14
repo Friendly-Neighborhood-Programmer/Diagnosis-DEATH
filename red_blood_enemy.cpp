@@ -1,7 +1,7 @@
 #include "red_blood_enemy.h"
 #include <iostream>
 #define CHARGE_SPEED 4
-#define PLAYER_RANGE 3
+#define PLAYER_RANGE 4
 #define START_CHARGE_RANGE 2
 
 
@@ -13,6 +13,8 @@ namespace game {
         curHealth = 3;
         speed = 1.4f;
         damage = 1;
+        moveTimer = 0;
+        randPoint = glm::vec3(0);
     }
 
     void RedBloodEnemy::Update(double delta_time) {
@@ -54,7 +56,12 @@ namespace game {
 
     //move towards player, with a little randomness
     void RedBloodEnemy::move(double delta_time) {
-        position_ -= glm::normalize((position_ - ((target->GetPosition() * glm::vec3(2, 2, 1) + glm::vec3(randF(-1.0f, 1.0f), randF(-1.0f, 1.0f), 0))))) * ((float)delta_time) * speed;
+        //position_ -= glm::normalize((-((target->GetPosition() * glm::vec3(2, 2, 1) + glm::vec3(randF(-1.0f, 1.0f), randF(-1.0f, 1.0f), 0)) - position_))) * ((float)delta_time) * speed;
+        if (moveTimer <= time) {
+            randPoint = glm::normalize((target->GetPosition() + glm::vec3(randF(-1.0f, 1.0f), randF(-1.0f, 1.0f), 0)) - position_);
+            moveTimer = time + 1 + randF(-0.35f, 0.35f);
+        }
+        position_ += randPoint * ((float)delta_time) * speed;
     }
 
     //charge towards charge point, which is players position 1.2 seconds ago

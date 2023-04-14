@@ -27,6 +27,9 @@
 
 #define GERM_INTERVAL 15
 #define PLAYER_START_HEALTH 10
+#define HALF_WORLD_SIZE 40
+#define WORLD_INTERVAL 20
+#define ZOOM_CONSTANT 0.95
 
 using namespace std;
 
@@ -153,59 +156,9 @@ void Game::Setup(void)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
     players[0] = new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[0]);
     players[0]->setIsMainPlayer(true);
+    players[0]->SetScale(1);
     players[0]->setMaxHealth(PLAYER_START_HEALTH);
     game_objects_.push_back(players[0]);
-
-    // Setup other objects
-    int num_enemies = 2;
-    
-    for (int i = 0; i < num_enemies; i++) {
-        RedBloodEnemy* newEnemy = new RedBloodEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[2]);
-        newEnemy->setTarget(players[0]);
-        game_objects_.push_back(newEnemy);
-    }
-    
-
-    for (int i = 0; i < num_enemies; i++) {
-        WhiteBloodEnemy* newEnemy = new WhiteBloodEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[1]);
-        newEnemy->setTarget(players[0]);
-        newEnemy->init(sprite_, &tex_[6], &sprite_shader_, this);
-        game_objects_.push_back(newEnemy);
-    }
-    
-    
-    for (int i = 0; i < num_enemies; i++) {
-        StemCellEnemy* newEnemy = new StemCellEnemy(glm::vec3(randF(-3.0, 3.0), randF(-3.0, 3.0), 0.0f), sprite_, &sprite_shader_, tex_[4]);
-        newEnemy->setTarget(players[0]);
-        newEnemy->init(sprite_, &tex_[6], &sprite_shader_, this);
-        game_objects_.push_back(newEnemy);
-    }
-    
-    //lets do max 4 bacteria
-    for (int i = 0; i < 4; i++) {
-        GameObject* newObj = new CollectibleGameObject(glm::vec3(randF(-4.0, 4.0), randF(-4.0, 4.0), 0.0f), sprite_, &sprite_shader_, tex_[10]);
-        newObj->setType(GameObject::Bacteria);
-        newObj->SetScale(0.25f);
-
-        game_objects_.push_back(newObj);
-    }
-
-    for (int i = 0; i < 4; i++) {
-        GameObject* newObj = new CollectibleGameObject(glm::vec3(randF(-4.0, 4.0), randF(-4.0, 4.0), 0.0f), sprite_, &sprite_shader_, tex_[9]);
-        newObj->setType(GameObject::Fat);
-        newObj->SetScale(0.5f);
-
-        game_objects_.push_back(newObj);
-    }
-
-    for (int i = 0; i < 4; i++) {
-        GameObject* newObj = new CollectibleGameObject(glm::vec3(randF(-4.0, 4.0), randF(-4.0, 4.0), 0.0f), sprite_, &sprite_shader_, tex_[8]);
-        newObj->setType(GameObject::Germ);
-        newObj->SetScale(0.25f);
-
-        game_objects_.push_back(newObj);
-    }
-
 
     // Set up text objs: health, text, and special bullet counters
     healthText = new TextGameObject(glm::vec3(-2.2f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
@@ -234,14 +187,115 @@ void Game::Setup(void)
     // Setup background
     // In this specific implementation, the background is always the
     // last object
+    /*
     GameObject *background = new GameObject(glm::vec3(0.0f, 0.0f, 2.0f), sprite_, &sprite_shader_, tex_[3]);
     background->SetScale(10.0);
     game_objects_.push_back(background);
+    */
+
+    //chance of spawning 5 enemies per tile
+    float constantNum = WORLD_INTERVAL / 2 / 2;
+    for (int row = -HALF_WORLD_SIZE; row <= HALF_WORLD_SIZE; row += WORLD_INTERVAL) {
+        for (int col = -HALF_WORLD_SIZE; col <= HALF_WORLD_SIZE; col += WORLD_INTERVAL) {
+            for (int x = -constantNum; x <= constantNum; x += constantNum) {
+                for (int y = -constantNum; y <= constantNum; y += constantNum) {
+
+                    //if on player spawn position, dont spawn enemies
+                    if (row == 0 && col == 0 && x == 0 && y == 0) {
+                        continue;
+                    }
+
+                    //30% no enemy, 40% red cell, 20% white cell, 10% stem cell 
+                    int i = randI(1, 100);
+                    if (i <= 30) {
+                        //no enemy here
+                        continue;
+                    }
+                    else if (i <= 70) {
+                        //spawn red cell
+                        RedBloodEnemy* newEnemy = new RedBloodEnemy(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[2]);
+                        newEnemy->setTarget(players[0]);
+                        game_objects_.push_back(newEnemy);
+                    }
+                    else if (i <= 90) {
+                        //spawn white cell
+                        WhiteBloodEnemy* newEnemy = new WhiteBloodEnemy(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[1]);
+                        newEnemy->setTarget(players[0]);
+                        newEnemy->init(sprite_, &tex_[7], &sprite_shader_, this);
+                        game_objects_.push_back(newEnemy);
+                    }
+                    else {
+                        //spawn stem cell
+                        StemCellEnemy* newEnemy = new StemCellEnemy(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[4]);
+                        newEnemy->setTarget(players[0]);
+                        newEnemy->init(sprite_, &tex_[7], &sprite_shader_, this);
+                        game_objects_.push_back(newEnemy);
+                    }
+                }
+            }
+        }
+    }
+
+    //chance of spawning 5 powerups per tile
+    for (int row = -HALF_WORLD_SIZE; row <= HALF_WORLD_SIZE; row += WORLD_INTERVAL) {
+        for (int col = -HALF_WORLD_SIZE; col <= HALF_WORLD_SIZE; col += WORLD_INTERVAL) {
+            for (int x = -constantNum; x <= constantNum; x += constantNum) {
+                for (int y = -constantNum; y <= constantNum; y += constantNum) {
+
+                    //if on player spawn position, dont spawn powerup
+                    if (row == 0 && col == 0 && x == 0 && y == 0) {
+                        continue;
+                    }
+
+                    //81% no spawn, 5% bacteria, 6% germ, 8% fat
+                    int i = randI(1, 100);
+                    if (i <= 81) {
+                        //no enemy here
+                        continue;
+                    }
+                    else if (i <= 86) {
+                        //spawn bacteria powerup
+                        GameObject* newObj = new CollectibleGameObject(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[10]);
+                        newObj->setType(GameObject::Bacteria);
+                        newObj->SetScale(0.5f);
+                        game_objects_.push_back(newObj);
+                    }
+                    else if (i <= 92) {
+                        //spawn germ powerup
+                        GameObject* newObj = new CollectibleGameObject(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[8]);
+                        newObj->setType(GameObject::Germ);
+                        newObj->SetScale(0.5f);
+                        game_objects_.push_back(newObj);
+                    }
+                    else {
+                        //spawn fat powerup
+                        GameObject* newObj = new CollectibleGameObject(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[9]);
+                        newObj->setType(GameObject::Fat);
+                        newObj->SetScale(0.5f);
+                        game_objects_.push_back(newObj);
+                    }
+                }
+            }
+        }
+    }
+
+    //background tiling
+    //13 to 16 index for background textures
+    for (int row = -HALF_WORLD_SIZE; row < HALF_WORLD_SIZE; row += WORLD_INTERVAL) {
+        for (int col = -HALF_WORLD_SIZE; col < HALF_WORLD_SIZE; col += WORLD_INTERVAL) {
+            int i = randI(13, 15);
+            GameObject* background = new GameObject(glm::vec3(row, col, 2.0f), sprite_, &sprite_shader_, tex_[i]);
+            background->SetScale(WORLD_INTERVAL);
+            game_objects_.push_back(background);
+        }
+    }
 
     // Setup particle system
+    /*
     GameObject *particles = new ParticleSystem(glm::vec3(0.0f, -0.5f, 0.0f), particles_, &particle_shader_, tex_[4], game_objects_[0]);
     particles->SetScale(0.2);
     game_objects_.push_back(particles);
+    */
 }
 
 
@@ -278,19 +332,23 @@ void Game::SetAllTextures(void)
 {
     // Load all textures that we will need
     glGenTextures(NUM_TEXTURES, tex_);
-    SetTexture(tex_[0], (resources_directory_g+std::string("/textures/destroyer_red.png")).c_str());
-    SetTexture(tex_[1], (resources_directory_g+std::string("/textures/destroyer_green.png")).c_str());
-    SetTexture(tex_[2], (resources_directory_g+std::string("/textures/destroyer_blue.png")).c_str());
-    SetTexture(tex_[3], (resources_directory_g+std::string("/textures/stars.png")).c_str());
-    SetTexture(tex_[4], (resources_directory_g+std::string("/textures/orb.png")).c_str());
+    SetTexture(tex_[0], (resources_directory_g+std::string("/textures/player.png")).c_str());
+    SetTexture(tex_[1], (resources_directory_g+std::string("/textures/white_bloodcell.png")).c_str());
+    SetTexture(tex_[2], (resources_directory_g+std::string("/textures/red_bloodcell.png")).c_str());
+    SetTexture(tex_[3], (resources_directory_g+std::string("/textures/player_ghosts.png")).c_str());
+    SetTexture(tex_[4], (resources_directory_g+std::string("/textures/stem_cell.png")).c_str());
     SetTexture(tex_[5], (resources_directory_g + std::string("/textures/explosion.png")).c_str());
-    SetTexture(tex_[6], (resources_directory_g + std::string("/textures/bullet.png")).c_str());
-    SetTexture(tex_[7], (resources_directory_g + std::string("/textures/blade.png")).c_str());
+    SetTexture(tex_[6], (resources_directory_g + std::string("/textures/player_bullet.png")).c_str());
+    SetTexture(tex_[7], (resources_directory_g + std::string("/textures/enemy_bullet.png")).c_str());
     SetTexture(tex_[8], (resources_directory_g + std::string("/textures/germ_powerup.png")).c_str());
     SetTexture(tex_[9], (resources_directory_g + std::string("/textures/fat_powerup.png")).c_str());
     SetTexture(tex_[10], (resources_directory_g + std::string("/textures/bacteria_powerup.png")).c_str());
     SetTexture(tex_[11], (resources_directory_g + std::string("/textures/Empty.png")).c_str());
     SetTexture(tex_[12], (resources_directory_g + std::string("/textures/font.png")).c_str());
+    SetTexture(tex_[13], (resources_directory_g + std::string("/textures/BG_tile1.png")).c_str());
+    SetTexture(tex_[14], (resources_directory_g + std::string("/textures/BG_tile2.png")).c_str());
+    SetTexture(tex_[15], (resources_directory_g + std::string("/textures/BG_tile3.png")).c_str());
+    SetTexture(tex_[16], (resources_directory_g + std::string("/textures/BG_boss.png")).c_str());
     glBindTexture(GL_TEXTURE_2D, tex_[0]);
 }
 
@@ -391,7 +449,8 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
             current_game_object->timeAlive >= 1.0f && 
             current_game_object->GetState() == GameObject::Active) {
 
-            current_game_object->Explode(tex_[5]);
+            current_game_object->Explode(tex_[11]);
+            current_game_object->SetPosition(current_game_object->GetPosition() + glm::vec3(0, 0, 50));
             BulletGameObject* bullet = dynamic_cast<BulletGameObject*>(current_game_object);
             if (bullet->getBulletType() == BulletGameObject::Enemy) {
                 GameObject* particles = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &enemy_explosion_particle_shader_, tex_[4], current_game_object);
@@ -400,7 +459,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
             }
             else {
                 GameObject* particles = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], current_game_object);
-                particles->SetScale(0.08);
+                particles->SetScale(0.08 + ((numScales + 1) * 0.02));
                 game_objects_.push_back(particles);
             }
             continue;
@@ -471,9 +530,9 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                                     players[i]->die();
                                 }
                                 if(i == 1)
-                                    players[i] = new PlayerGameObject(players[0]->GetPosition() + (glm::vec3(-1.0f, 0.0f, 0.0f)), sprite_, &sprite_shader_, tex_[2]);
+                                    players[i] = new PlayerGameObject(players[0]->GetPosition() + (glm::vec3(-1.0f, 0.0f, 0.0f)), sprite_, &sprite_shader_, tex_[3]);
                                 else if(i == 2)
-                                    players[i] = new PlayerGameObject(players[0]->GetPosition() + (glm::vec3(1.0f, 0.0f, 0.0f)), sprite_, &sprite_shader_, tex_[1]);
+                                    players[i] = new PlayerGameObject(players[0]->GetPosition() + (glm::vec3(1.0f, 0.0f, 0.0f)), sprite_, &sprite_shader_, tex_[3]);
                                 players[i]->setMaxHealth(players[0]->getMaxHealth()/2);
                                 players[i]->heal(players[0]->getMaxHealth() / 2);
                                 game_objects_.insert(game_objects_.begin() + 1, players[i]);
@@ -483,11 +542,10 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                             break;
                         case GameObject::Bacteria:
                             //collect bacteria powerup, gives size, max hp, damage, zooms out camera
-                            players[0]->SetScale(players[0]->GetScale() + 0.2f);
+                            players[0]->SetScale(players[0]->GetScale() + 0.07f);
                             players[0]->setMaxHealth(players[0]->getMaxHealth() + 3);
                             players[0]->heal(3);
-                            players[0]->setDamage(players[0]->getDamage() + 1);
-                            camera_zoom -= 0.03f;
+                            camera_zoom *= ZOOM_CONSTANT;
                             ++numScales;
                             adjustUiElts();
                             break;
@@ -549,7 +607,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                         }
                         else {
                             GameObject* explosion1 = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], bullet);
-                            explosion1->SetScale(0.08);
+                            explosion1->SetScale(0.08 + ((numScales + 1) * 0.02));
                             game_objects_.push_back(explosion1);
                         }
                     }
@@ -641,16 +699,22 @@ void Game::Controls(double delta_time)
     }
     if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS) {
         if (player->canShoot()) {
+            /*
+            camera_zoom *= ZOOM_CONSTANT;
+            ++numScales;
+            adjustUiElts();
+            */
             for (int i = 0; i < NUM_PLAYERS; i++) {
                 GameObject* player = players[i];
                 if (player == nullptr) {
                     break;
                 }
                 GameObject* bullet = player->shoot(sprite_, &sprite_shader_, tex_[6]);
+                bullet->SetScale(2 + ((numScales * 0.5)));
                 game_objects_.push_back(bullet);
                 // TRAIL PARTICALS
                 GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullet);
-                particles->SetScale(0.08 * (numScales + 1));
+                particles->SetScale(0.08 + ((numScales + 1) * 0.05));
                 game_objects_.push_back(particles);
                 bullet->setChildParticle(particles);
                 
@@ -664,11 +728,11 @@ void Game::Controls(double delta_time)
                 if (player == nullptr) {
                     break;
                 }
-                vector<PlayerBulletGameObject*> bullets = player->spiralShoot(sprite_, &sprite_shader_, tex_[6]);
+                vector<PlayerBulletGameObject*> bullets = player->spiralShoot(sprite_, &sprite_shader_, tex_[6], numScales);
                 for (int i = 0; i < bullets.size(); i++) { //perform things on the bullets in the vector
                     // TRAIL PARTICALS
                     GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullets[i]);
-                    particles->SetScale(0.08 * (numScales + 1));
+                    particles->SetScale(0.08 + ((numScales + 1) * 0.05));
                     game_objects_.push_back(particles);
                     bullets[i]->setChildParticle(particles);
                 }
@@ -694,25 +758,32 @@ void Game::adjustUiElts() { //TODO KEEP UI CONSISTNET WITH CAMERA ZOOM and, once
     for (int i = 0; i < UI_objects_.size(); i++) {
         //UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() * (glm::vec3(1) + (glm::vec3(-1) * scalar)));
         //UI_objects_[i]->SetScale(UI_objects_[i]->GetScale() * (-1 * scalar.x));
-        UI_objects_[i]->SetScale((numScales * 1.2) * camera_zoom + 2);
+        float dontMindMeHaha = ZOOM_CONSTANT * camera_zoom;
+        UI_objects_[i]->SetScale(0.5/dontMindMeHaha);
         //health starts at -2.2
         if (i == 0) {
-            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(-0.3)));
+            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(-dontMindMeHaha, -dontMindMeHaha, 0)));
         }
         //timer starts at 0
         if (i == 1) {
-            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(0, -0.3, 0)));
+            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(0, -dontMindMeHaha, 0)));
         }
 
         //SS starts at 3.2
         if (i == 2) {
-            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(0.3, -0.3, 0)));
+            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(dontMindMeHaha, -dontMindMeHaha, 0)));
         }
     }
 }
 
 float Game::randF(float min, float max) {
     return min + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (max - min)));
+}
+
+//inclusive inclusive
+int Game::randI(int i, int j) {
+    return rand() % (j-i+1) + i;
+    //return rand() % j + i;
 }
        
 void Game::setTimer(double time) { // format: "0:00:00:00" as hour, minute, second, milasecond

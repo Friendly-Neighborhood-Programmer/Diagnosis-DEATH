@@ -48,6 +48,7 @@ namespace game {
                 glm::vec3 dir = glm::vec3(glm::cos(angle), glm::sin(angle), 0);
                 EnemyBulletGameObject* bullet = new EnemyBulletGameObject(position_, angle-glm::radians(90.f), dir, bulletSprite, bulletShader, *bulletTexture);
                 bullet->setDamage(getDamage());
+                bullet->SetScale(2);
                 game->addGameObject(bullet);
             }
             setTimer();

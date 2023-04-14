@@ -20,6 +20,8 @@ namespace game {
         void startAttack();
         double attackTimer;
         glm::vec3 chargePoint;
+        glm::vec3 randPoint;
+        double moveTimer;
     };
 
 

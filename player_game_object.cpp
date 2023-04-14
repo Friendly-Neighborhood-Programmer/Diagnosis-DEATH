@@ -47,7 +47,7 @@ int PlayerGameObject::dealDamage() {
     return 0;
 }
 
-vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, Shader* shader, GLuint texture) {
+vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, Shader* shader, GLuint texture, int numScales) {
     bulletAmount--;
     vector<PlayerBulletGameObject*> bullets;
 
@@ -57,6 +57,7 @@ vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, 
 
         PlayerBulletGameObject* bullet = new PlayerBulletGameObject(position_, angle-glm::radians(90.f), dir, sprite, shader, texture);
         bullet->setDamage(getDamage());
+        bullet->SetScale(2 + ((numScales * 0.5)));
         
         //add to collection of all bullets
         bullets.push_back(bullet);
