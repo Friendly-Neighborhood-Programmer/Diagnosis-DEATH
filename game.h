@@ -54,6 +54,8 @@ namespace game {
             Shader particle_shader_;
             Shader trail_particle_shader_;
             Shader explosion_particle_shader_;
+            Shader enemy_trail_particle_shader_;
+            Shader enemy_explosion_particle_shader_;
 
             // Shader for rendering text
             Shader text_shader_;

@@ -111,6 +111,10 @@ void Game::Init(void)
     trail_particle_shader_.Init((resources_directory_g+std::string("/trail_particle_vertex_shader.glsl")).c_str(), (resources_directory_g+std::string("/trail_particle_fragment_shader.glsl")).c_str());
     explosion_particle_shader_.Init((resources_directory_g+std::string("/explosion_particle_vertex_shader.glsl")).c_str(), (resources_directory_g+std::string("/explosion_particle_fragment_shader.glsl")).c_str());
 
+    enemy_trail_particle_shader_.Init((resources_directory_g + std::string("/trail_particle_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/enemy_trail_particle_fragment_shader.glsl")).c_str());
+    enemy_explosion_particle_shader_.Init((resources_directory_g + std::string("/explosion_particle_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/enemy_explosion_particle_fragment_shader.glsl")).c_str());
+
+
     // Initialize sprite shader
     sprite_shader_.Init((resources_directory_g+std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g+std::string("/sprite_fragment_shader.glsl")).c_str());
 
@@ -388,9 +392,17 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
             current_game_object->GetState() == GameObject::Active) {
 
             current_game_object->Explode(tex_[5]);
-            GameObject* particles = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], current_game_object);
-            particles->SetScale(0.08);
-            game_objects_.push_back(particles);
+            BulletGameObject* bullet = dynamic_cast<BulletGameObject*>(current_game_object);
+            if (bullet->getBulletType() == BulletGameObject::Enemy) {
+                GameObject* particles = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &enemy_explosion_particle_shader_, tex_[4], current_game_object);
+                particles->SetScale(0.08);
+                game_objects_.push_back(particles);
+            }
+            else {
+                GameObject* particles = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], current_game_object);
+                particles->SetScale(0.08);
+                game_objects_.push_back(particles);
+            }
             continue;
         }
 
@@ -528,9 +540,18 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                         }
                         bullet->Explode(tex_[11]);
                         bullet->die();
-                        GameObject* explosion1 = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], bullet);
-                        explosion1->SetScale(0.08);
-                        game_objects_.push_back(explosion1);
+                            
+                        BulletGameObject* b = dynamic_cast<BulletGameObject*>(bullet);
+                        if (b->getBulletType() == BulletGameObject::Enemy) {
+                            GameObject* explosion1 = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &enemy_explosion_particle_shader_, tex_[4], bullet);
+                            explosion1->SetScale(0.08);
+                            game_objects_.push_back(explosion1);
+                        }
+                        else {
+                            GameObject* explosion1 = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], bullet);
+                            explosion1->SetScale(0.08);
+                            game_objects_.push_back(explosion1);
+                        }
                     }
                 }
 

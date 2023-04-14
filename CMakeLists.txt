@@ -59,8 +59,10 @@ set(SRCS
     particle_fragment_shader.glsl
 	trail_particle_vertex_shader.glsl
     trail_particle_fragment_shader.glsl
+    enemy_trail_particle_fragment_shader.glsl
 	explosion_particle_vertex_shader.glsl
     explosion_particle_fragment_shader.glsl
+    enemy_explosion_particle_fragment_shader.glsl
   text_fragment_shader.glsl	
 )
 
