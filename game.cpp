@@ -25,7 +25,7 @@
 
 #include "text_game_object.h"
 
-#define GERM_INTERVAL 30
+#define GERM_INTERVAL 15
 #define PLAYER_START_HEALTH 10
 
 using namespace std;
@@ -151,9 +151,6 @@ void Game::Setup(void)
     players[0]->setIsMainPlayer(true);
     players[0]->setMaxHealth(PLAYER_START_HEALTH);
     game_objects_.push_back(players[0]);
-    game_objects_.push_back(new GameObject(glm::vec3(0.0f, 0.0f, -0.1f), sprite_, &sprite_shader_, tex_[7]));
-    game_objects_[1]->SetParent(game_objects_[0]);
-    game_objects_[1]->setType(GameObject::Blade);
 
     // Setup other objects
     int num_enemies = 2;
@@ -221,9 +218,13 @@ void Game::Setup(void)
 
     SSText = new TextGameObject(glm::vec3(2.2f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
     SSText->SetScale(1.0f);
-    SSText->SetText("SS: "+to_string(players[0]->getBulletAmount()));
+    SSText->SetText("SP: " + to_string(players[0]->getBulletAmount()));
     UI_objects_.push_back(SSText);
     game_objects_.push_back(SSText);
+
+    for (int i = 0; i < UI_objects_.size(); i++) {
+        UI_objects_[i]->setInitPos(UI_objects_[i]->GetPosition());
+    }
     
     adjustUiElts();
     // Setup background
@@ -304,7 +305,7 @@ void Game::MainLoop(void)
 
         // Set view to zoom out, centered by default at 0,0
         
-        glm::mat4 view_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(camera_zoom, camera_zoom, camera_zoom));
+        glm::mat4 view_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(camera_zoom, camera_zoom, camera_zoom)) * glm::translate(glm::mat4(1.0f), glm::vec3(players[0]->GetPosition().x * -1, players[0]->GetPosition().y * -1, 0));
 
         // Calculate delta time
         double current_time = glfwGetTime();
@@ -328,7 +329,7 @@ void Game::addGameObject(GameObject* go) {
 
 void Game::Update(glm::mat4 view_matrix, double delta_time)
 {
-
+    adjustUiElts();
     // Update time
     current_time_ += delta_time;
     setTimer(current_time_);
@@ -446,7 +447,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                         //(except for clone (germ) it has 3 constants up top)
                         case GameObject::Fat:
                             //collect fat powerup, get more special bullets
-                            players[0]->addBulletAmount(2);
+                            players[0]->addBulletAmount(3);
                             SSText->SetText("SS: " + to_string(players[0]->getBulletAmount())); //update the UI
                             break;
                         case GameObject::Germ:
@@ -475,7 +476,6 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                             players[0]->heal(3);
                             players[0]->setDamage(players[0]->getDamage() + 1);
                             camera_zoom -= 0.03f;
-                            healthText->SetText("Health: " + to_string(players[0]->getHealth())+"/"+ to_string(players[0]->getMaxHealth()));
                             ++numScales;
                             adjustUiElts();
                             break;
@@ -523,12 +523,9 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                 if (bullet != nullptr){
                     if (bullet->GetState() != GameObject::DyingBullet) { //if the bullet has not already struck somthing
                         enemy->takeDamage(bullet->dealDamage());
-                        //for UI
-                        if (enemy->getIsMainPlayer()) { //if main player is getting hit
-                            cout << "Hit" << endl;
-                            healthText->SetText("Health: " + to_string(enemy->getHealth()) + "/" + to_string(enemy->getMaxHealth()));
+                        if (enemy->getType() == GameObject::Enemy && enemy->GetState() == GameObject::Died) {
+                            players[0]->heal(1);
                         }
-
                         bullet->Explode(tex_[11]);
                         bullet->die();
                         GameObject* explosion1 = new ExplosionParticleSystem(glm::vec3(0.0f, 0.0f, -0.5f), explosion_particles_, &explosion_particle_shader_, tex_[4], bullet);
@@ -632,7 +629,7 @@ void Game::Controls(double delta_time)
                 game_objects_.push_back(bullet);
                 // TRAIL PARTICALS
                 GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullet);
-                particles->SetScale(0.08);
+                particles->SetScale(0.08 * (numScales + 1));
                 game_objects_.push_back(particles);
                 bullet->setChildParticle(particles);
                 
@@ -650,7 +647,7 @@ void Game::Controls(double delta_time)
                 for (int i = 0; i < bullets.size(); i++) { //perform things on the bullets in the vector
                     // TRAIL PARTICALS
                     GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullets[i]);
-                    particles->SetScale(0.08);
+                    particles->SetScale(0.08 * (numScales + 1));
                     game_objects_.push_back(particles);
                     bullets[i]->setChildParticle(particles);
                 }
@@ -671,22 +668,24 @@ void Game::Controls(double delta_time)
 }
 
 void Game::adjustUiElts() { //TODO KEEP UI CONSISTNET WITH CAMERA ZOOM and, once its in CAMERA MOVMENT
+    SSText->SetText("SP: " + to_string(players[0]->getBulletAmount()));
+    healthText->SetText("Health: " + to_string(players[0]->getHealth()) + "/" + to_string(players[0]->getMaxHealth()));
     for (int i = 0; i < UI_objects_.size(); i++) {
         //UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() * (glm::vec3(1) + (glm::vec3(-1) * scalar)));
         //UI_objects_[i]->SetScale(UI_objects_[i]->GetScale() * (-1 * scalar.x));
         UI_objects_[i]->SetScale((numScales * 1.2) * camera_zoom + 2);
         //health starts at -2.2
         if (i == 0) {
-            UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() + (glm::vec3(numScales) * glm::vec3(-0.3)));
+            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(-0.3)));
         }
         //timer starts at 0
         if (i == 1) {
-            UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() + (glm::vec3(numScales) * glm::vec3(0, -0.3, 0)));
+            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(0, -0.3, 0)));
         }
 
         //SS starts at 3.2
         if (i == 2) {
-            UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() + (glm::vec3(numScales) * glm::vec3(0.3, -0.3, 0)));
+            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(0.3, -0.3, 0)));
         }
     }
 }

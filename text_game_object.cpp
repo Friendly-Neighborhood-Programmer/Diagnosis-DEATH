@@ -67,6 +67,13 @@ std::string TextGameObject::GetText(void) const {
     return text_;
 }
 
+void TextGameObject::setInitPos(glm::vec3 newPos) {
+    initPos = newPos;
+}
+
+glm::vec3 TextGameObject::getInitPos() {
+    return initPos;
+}
 
 void TextGameObject::SetText(std::string text){
 

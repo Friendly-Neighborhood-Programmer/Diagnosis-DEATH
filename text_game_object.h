@@ -20,8 +20,12 @@ namespace game {
             // Render function for the text
             void Render(glm::mat4 view_matrix, double current_time) override;
 
+            void setInitPos(glm::vec3);
+            glm::vec3 getInitPos();
+
         private:
             std::string text_;
+            glm::vec3 initPos;
 
     }; // class TextGameObject
 
