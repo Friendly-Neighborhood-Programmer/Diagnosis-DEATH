@@ -1,3 +1,5 @@
+Authors: Vitaly Dufour (101247178)
+
 OS: Windows
 
 How to Play:
