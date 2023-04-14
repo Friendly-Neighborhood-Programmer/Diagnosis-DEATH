@@ -63,12 +63,12 @@ namespace game {
             angle += (glm::pi<float>() / 2); //Uneeded, but might be useful later
             EnemyBulletGameObject* bullet = new EnemyBulletGameObject(position_, angle, direction, bulletSprite, bulletShader, *bulletTexture);
             bullet->setDamage(getDamage());
+            bullet->SetScale(2);
             game->addGameObject(bullet);
             setTimer();
         }
         if (moveTimer <= time) {
-            randPoint = glm::vec3(randF(-10.0f, 10.0f), randF(-10.0f, 10.0f), 0.0f);
-            randPoint = glm::normalize(randPoint);
+            randPoint = glm::vec3(randF(-1.0f, 1.0f), randF(-1.0f, 1.0f), 0.0f);
             moveTimer = time + 0.75f + randF(-0.25f, 0.25f);
         }
         position_ -= randPoint * (float)delta_time * speed;

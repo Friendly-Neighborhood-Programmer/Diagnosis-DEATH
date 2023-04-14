@@ -27,7 +27,7 @@ GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader
     damage = 1;
     particle = nullptr;
     bullet = nullptr;
-    bulletAmount = 3;
+    bulletAmount = 0;
     cooldown = 0.7f;
     isMainPlayer = false;
 }
@@ -195,7 +195,7 @@ void GameObject::Explode(GLuint exp_texture) {
     state_ = Exploded;
     // Start explosion timer
     exp_time_ = 0.0;
-    // Explosion should end after 3 seconds
+    // Explosion should end after 0 seconds..
     exp_end_time_ = 3.0;
     // Update the texture of the game object
     texture_ = exp_texture;

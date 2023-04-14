@@ -34,6 +34,7 @@ namespace game {
             void MainLoop(void); 
 
             void addGameObject(GameObject*);
+            int randI(int, int);
 
         private:
             // Main window: pointer to the GLFW window structure
@@ -66,7 +67,7 @@ namespace game {
             int numScales;
 
             // References to textures
-#define NUM_TEXTURES 13
+#define NUM_TEXTURES 17
             GLuint tex_[NUM_TEXTURES];
 
             // List of game objects

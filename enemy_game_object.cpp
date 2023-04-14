@@ -50,13 +50,12 @@ namespace game {
     }
 
     void EnemyGameObject::run(double delta_time) {
-        position_ -= (target->GetPosition() - position_) * ((float)delta_time) * speed;
+        position_ -= glm::normalize((target->GetPosition() - position_)) * ((float)delta_time) * speed;
     }
 
     void EnemyGameObject::patrol(double delta_time) {
         if (moveTimer <= time) {
-            randPoint = glm::vec3(randF(-10.0f, 10.0f), randF(-10.0f, 10.0f), 0.0f);
-            randPoint = glm::normalize(randPoint);
+            randPoint = glm::vec3(randF(-1.0f, 1.0f), randF(-1.0f, 1.0f), 0.0f);
             moveTimer = time + 2 + randF(-1.0f, 1.0f);
         }
         position_ -= randPoint * (float)delta_time * speed;
