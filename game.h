@@ -96,6 +96,8 @@ namespace game {
             //new stuff
             PlayerGameObject* players[NUM_PLAYERS];
 
+            int score;
+
             //UI stuff
             void adjustUiElts();
             void setTimer(double time);
@@ -103,6 +105,7 @@ namespace game {
             TextGameObject* healthText;
             TextGameObject* timerText;
             TextGameObject* SSText;
+            TextGameObject* ScoreText;
 
     }; // class Game
 

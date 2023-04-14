@@ -10,11 +10,12 @@ namespace game {
         : EnemyGameObject(position, geom, shader, texture) {
         radius = 1.0f;
         attackTimer = -1.0;
-        curHealth = 3;
+        curHealth = 2;
         speed = 1.4f;
         damage = 1;
         moveTimer = 0;
         randPoint = glm::vec3(0);
+        score = 1;
     }
 
     void RedBloodEnemy::Update(double delta_time) {

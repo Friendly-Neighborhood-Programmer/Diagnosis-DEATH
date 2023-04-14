@@ -14,8 +14,9 @@ namespace game {
         bulletTexture = nullptr;
         bulletShader = nullptr;
         setTimer();
-        curHealth = 15;
-        damage = 1;
+        curHealth = 6;
+        damage = 2;
+        score = 2;
     }
 
     //attack cooldown, with a little randomness
@@ -27,9 +28,15 @@ namespace game {
         time += delta_time;
         //detect if player is close
         if (target != nullptr) {
-            //will basically just call attack() since my state is always attack
-            EnemyGameObject::Update(delta_time);
+            float distance = glm::length(position_ - target->GetPosition());
+            state = Moving;
+            if (distance < 6) {
+                state = Attacking;
+            }
         }
+
+        //will basically just call attack() since my state is always attack
+        EnemyGameObject::Update(delta_time);
     }
 
     //init bullet things :)

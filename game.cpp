@@ -27,8 +27,8 @@
 
 #define GERM_INTERVAL 15
 #define PLAYER_START_HEALTH 10
-#define HALF_WORLD_SIZE 40
-#define WORLD_INTERVAL 20
+#define HALF_WORLD_SIZE 80
+#define WORLD_INTERVAL 40
 #define ZOOM_CONSTANT 0.95
 
 using namespace std;
@@ -57,6 +57,7 @@ Game::Game(void)
 void Game::Init(void)
 {
     numScales = 0;
+    score = 0;
     for (int i = 0; i < NUM_PLAYERS; i++) {
         players[i] = nullptr;
     }
@@ -169,7 +170,7 @@ void Game::Setup(void)
 
     timerText = new TextGameObject(glm::vec3(0.0f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
     timerText->SetScale(1.0f);
-    timerText->SetText("0:00:00:00");
+    timerText->SetText("00:00:00");
     UI_objects_.push_back(timerText);
     game_objects_.push_back(timerText);
 
@@ -178,6 +179,12 @@ void Game::Setup(void)
     SSText->SetText("SP: " + to_string(players[0]->getBulletAmount()));
     UI_objects_.push_back(SSText);
     game_objects_.push_back(SSText);
+
+    ScoreText = new TextGameObject(glm::vec3(2.2f, 3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
+    ScoreText->SetScale(1.0f);
+    ScoreText->SetText("Score: " + to_string(score));
+    UI_objects_.push_back(ScoreText);
+    game_objects_.push_back(ScoreText);
 
     for (int i = 0; i < UI_objects_.size(); i++) {
         UI_objects_[i]->setInitPos(UI_objects_[i]->GetPosition());
@@ -194,41 +201,46 @@ void Game::Setup(void)
     */
 
     //chance of spawning 5 enemies per tile
-    float constantNum = WORLD_INTERVAL / 2 / 2;
+    float constantNum = WORLD_INTERVAL / 3 ;
+    float constantNum2 = constantNum * 0.5;
     for (int row = -HALF_WORLD_SIZE; row <= HALF_WORLD_SIZE; row += WORLD_INTERVAL) {
         for (int col = -HALF_WORLD_SIZE; col <= HALF_WORLD_SIZE; col += WORLD_INTERVAL) {
-            for (int x = -constantNum; x <= constantNum; x += constantNum) {
-                for (int y = -constantNum; y <= constantNum; y += constantNum) {
+            for (int x = -constantNum; x <= constantNum; x += constantNum2) {
+                for (int y = -constantNum; y <= constantNum; y += constantNum2) {
 
                     //if on player spawn position, dont spawn enemies
                     if (row == 0 && col == 0 && x == 0 && y == 0) {
                         continue;
                     }
 
-                    //30% no enemy, 40% red cell, 20% white cell, 10% stem cell 
+                    // 20% nothing, 55% red cell, 25% white cell, 
+                    // 10% stem cell on top of another position
                     int i = randI(1, 100);
-                    if (i <= 30) {
+                    if (i <= 20) {
                         //no enemy here
                         continue;
                     }
-                    else if (i <= 70) {
+                    else if (i <= 75) {
                         //spawn red cell
                         RedBloodEnemy* newEnemy = new RedBloodEnemy(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[2]);
                         newEnemy->setTarget(players[0]);
+                        newEnemy->SetScale(0.7f);
                         game_objects_.push_back(newEnemy);
                     }
-                    else if (i <= 90) {
+                    else {
                         //spawn white cell
                         WhiteBloodEnemy* newEnemy = new WhiteBloodEnemy(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[1]);
                         newEnemy->setTarget(players[0]);
                         newEnemy->init(sprite_, &tex_[7], &sprite_shader_, this);
+                        newEnemy->SetScale(1.5f);
                         game_objects_.push_back(newEnemy);
                     }
-                    else {
+                    if (randI(1,100) >= 90) {
                         //spawn stem cell
                         StemCellEnemy* newEnemy = new StemCellEnemy(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[4]);
                         newEnemy->setTarget(players[0]);
                         newEnemy->init(sprite_, &tex_[7], &sprite_shader_, this);
+                        newEnemy->SetScale(0.5f);
                         game_objects_.push_back(newEnemy);
                     }
                 }
@@ -239,8 +251,8 @@ void Game::Setup(void)
     //chance of spawning 5 powerups per tile
     for (int row = -HALF_WORLD_SIZE; row <= HALF_WORLD_SIZE; row += WORLD_INTERVAL) {
         for (int col = -HALF_WORLD_SIZE; col <= HALF_WORLD_SIZE; col += WORLD_INTERVAL) {
-            for (int x = -constantNum; x <= constantNum; x += constantNum) {
-                for (int y = -constantNum; y <= constantNum; y += constantNum) {
+            for (int x = -constantNum; x <= constantNum; x += constantNum2) {
+                for (int y = -constantNum; y <= constantNum; y += constantNum2) {
 
                     //if on player spawn position, dont spawn powerup
                     if (row == 0 && col == 0 && x == 0 && y == 0) {
@@ -271,7 +283,6 @@ void Game::Setup(void)
                         //spawn fat powerup
                         GameObject* newObj = new CollectibleGameObject(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[9]);
                         newObj->setType(GameObject::Fat);
-                        newObj->SetScale(0.5f);
                         game_objects_.push_back(newObj);
                     }
                 }
@@ -281,8 +292,8 @@ void Game::Setup(void)
 
     //background tiling
     //13 to 16 index for background textures
-    for (int row = -HALF_WORLD_SIZE; row < HALF_WORLD_SIZE; row += WORLD_INTERVAL) {
-        for (int col = -HALF_WORLD_SIZE; col < HALF_WORLD_SIZE; col += WORLD_INTERVAL) {
+    for (int row = -HALF_WORLD_SIZE; row <= HALF_WORLD_SIZE; row += WORLD_INTERVAL) {
+        for (int col = -HALF_WORLD_SIZE; col <= HALF_WORLD_SIZE; col += WORLD_INTERVAL) {
             int i = randI(13, 15);
             GameObject* background = new GameObject(glm::vec3(row, col, 2.0f), sprite_, &sprite_shader_, tex_[i]);
             background->SetScale(WORLD_INTERVAL);
@@ -391,6 +402,19 @@ void Game::addGameObject(GameObject* go) {
 
 void Game::Update(glm::mat4 view_matrix, double delta_time)
 {
+    if (score >= 15) {
+        int milaSecond = (current_time_ - floor(current_time_)) * 100;
+        int t = current_time_ - (milaSecond / 100);
+        int second = t % 60;
+        t -= second;
+        int minute = ((t / 60) % 60);
+        t -= minute;
+
+        cout << "YOU WERE VICTORIOUS IN CONQUERING THE HUMAN BODY! It took you "
+             << minute << " minutes, " << second << " seconds and " << milaSecond << " milliseconds." << endl;
+        glfwSetWindowShouldClose(window_, true);
+    }
+
     adjustUiElts();
     // Update time
     current_time_ += delta_time;
@@ -446,7 +470,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
 
         // timeout for bullets, kill after 1 second of hitting nothing
         if (current_game_object->getType() == GameObject::Bullet &&
-            current_game_object->timeAlive >= 1.0f && 
+            current_game_object->timeAlive >= 2.0f && 
             current_game_object->GetState() == GameObject::Active) {
 
             current_game_object->Explode(tex_[11]);
@@ -595,6 +619,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                         enemy->takeDamage(bullet->dealDamage());
                         if (enemy->getType() == GameObject::Enemy && enemy->GetState() == GameObject::Died) {
                             players[0]->heal(1);
+                            score+=enemy->getScore();
                         }
                         bullet->Explode(tex_[11]);
                         bullet->die();
@@ -707,7 +732,7 @@ void Game::Controls(double delta_time)
             for (int i = 0; i < NUM_PLAYERS; i++) {
                 GameObject* player = players[i];
                 if (player == nullptr) {
-                    break;
+                    continue;
                 }
                 GameObject* bullet = player->shoot(sprite_, &sprite_shader_, tex_[6]);
                 bullet->SetScale(2 + ((numScales * 0.5)));
@@ -726,7 +751,7 @@ void Game::Controls(double delta_time)
             for (int i = 0; i < NUM_PLAYERS; i++) {
                 PlayerGameObject* player = players[i];
                 if (player == nullptr) {
-                    break;
+                    continue;
                 }
                 vector<PlayerBulletGameObject*> bullets = player->spiralShoot(sprite_, &sprite_shader_, tex_[6], numScales);
                 for (int i = 0; i < bullets.size(); i++) { //perform things on the bullets in the vector
@@ -742,10 +767,10 @@ void Game::Controls(double delta_time)
         }
     }
     if (glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS) {
-        player->SetPosition(curpos - motion_increment * player->GetRight());
+        player->SetVelocity(-player->GetRight() * speed);
     }
     if (glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS) {
-        player->SetPosition(curpos + motion_increment * player->GetRight());
+        player->SetVelocity(player->GetRight() * speed);
     }
     if (glfwGetKey(window_, GLFW_KEY_Q) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window_, true);
@@ -755,6 +780,7 @@ void Game::Controls(double delta_time)
 void Game::adjustUiElts() { //TODO KEEP UI CONSISTNET WITH CAMERA ZOOM and, once its in CAMERA MOVMENT
     SSText->SetText("SP: " + to_string(players[0]->getBulletAmount()));
     healthText->SetText("Health: " + to_string(players[0]->getHealth()) + "/" + to_string(players[0]->getMaxHealth()));
+    ScoreText->SetText("Score: " + to_string(score));
     for (int i = 0; i < UI_objects_.size(); i++) {
         //UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() * (glm::vec3(1) + (glm::vec3(-1) * scalar)));
         //UI_objects_[i]->SetScale(UI_objects_[i]->GetScale() * (-1 * scalar.x));
@@ -772,6 +798,9 @@ void Game::adjustUiElts() { //TODO KEEP UI CONSISTNET WITH CAMERA ZOOM and, once
         //SS starts at 3.2
         if (i == 2) {
             UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(dontMindMeHaha, -dontMindMeHaha, 0)));
+        }
+        if (i == 3) {
+            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(dontMindMeHaha, dontMindMeHaha, 0)));
         }
     }
 }
@@ -793,9 +822,8 @@ void Game::setTimer(double time) { // format: "0:00:00:00" as hour, minute, seco
     t -= second;
     int minute = ((t/60) % 60);
     t -= minute;
-    int hour = (t / 60) / 60;
 
-    timerText->SetText(to_string(hour)+":"+to_string(minute)+":"+to_string(second)+":"+to_string(milaSecond));
+    timerText->SetText(to_string(minute)+":"+to_string(second)+":"+to_string(milaSecond));
    
 }
 } // namespace game

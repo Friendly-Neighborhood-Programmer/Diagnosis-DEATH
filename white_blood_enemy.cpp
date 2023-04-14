@@ -6,7 +6,7 @@ namespace game {
     WhiteBloodEnemy::WhiteBloodEnemy(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture)
         : EnemyGameObject(position, geom, shader, texture) {
         radius = 0.5f;
-        curHealth = 7;
+        curHealth = 3;
         damage = 2;
         speed = 0.7f;
         bulletSprite = nullptr;
@@ -14,6 +14,7 @@ namespace game {
         bulletShader = nullptr;
         attackTimer = 0;
         setTimer();
+        score = 2;
     }
 
     //init bullet things :)
@@ -47,7 +48,7 @@ namespace game {
 
     //attack cooldown, with a little randomness
     void WhiteBloodEnemy::setTimer() {
-        attackTimer = time + 2 + randF(-1.0f, 1.0f);
+        attackTimer = time + 4 + randF(-1.0f, 1.0f);
     }
 
     //move towards player, with a little randomness
@@ -57,7 +58,7 @@ namespace game {
 
     void WhiteBloodEnemy::attack(double delta_time) {
         if (attackTimer <= time) {
-            glm::vec3 direction = glm::normalize(target->GetPosition() - GetPosition());
+            glm::vec3 direction = glm::normalize(target->GetPosition() - GetPosition()) * 0.5f;
             float angle = angle_;
             angle = (glm::atan(direction.y / direction.x));
             angle += (glm::pi<float>() / 2); //Uneeded, but might be useful later

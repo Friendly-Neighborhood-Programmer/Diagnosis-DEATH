@@ -47,6 +47,7 @@ namespace game {
             inline State GetState(void) { return state_; }
             inline ObjectType getType() { return oType; }
             virtual int getDamage() { return damage; };
+            int getScore() { return score; }
 
             // Get bearing direction (direction in which the game object
             // is facing)
@@ -136,6 +137,8 @@ namespace game {
 
             GameObject* bullet;
             int bulletAmount;
+
+            int score;
 
     }; // class GameObject
 
