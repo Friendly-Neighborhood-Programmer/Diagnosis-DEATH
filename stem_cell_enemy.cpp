@@ -14,7 +14,7 @@ namespace game {
         bulletTexture = nullptr;
         bulletShader = nullptr;
         setTimer();
-        curHealth = 6;
+        curHealth = 5;
         damage = 2;
         score = 2;
     }

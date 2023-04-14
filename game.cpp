@@ -159,6 +159,7 @@ void Game::Setup(void)
     players[0]->setIsMainPlayer(true);
     players[0]->SetScale(1);
     players[0]->setMaxHealth(PLAYER_START_HEALTH);
+    players[0]->heal(PLAYER_START_HEALTH);
     game_objects_.push_back(players[0]);
 
     // Set up text objs: health, text, and special bullet counters
@@ -259,20 +260,20 @@ void Game::Setup(void)
                         continue;
                     }
 
-                    //81% no spawn, 5% bacteria, 6% germ, 8% fat
+                    //75% no spawn, 9% bacteria, 6% germ, 10% fat
                     int i = randI(1, 100);
-                    if (i <= 81) {
+                    if (i <= 75) {
                         //no enemy here
                         continue;
                     }
-                    else if (i <= 86) {
+                    else if (i <= 84) {
                         //spawn bacteria powerup
                         GameObject* newObj = new CollectibleGameObject(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[10]);
                         newObj->setType(GameObject::Bacteria);
                         newObj->SetScale(0.5f);
                         game_objects_.push_back(newObj);
                     }
-                    else if (i <= 92) {
+                    else if (i <= 90) {
                         //spawn germ powerup
                         GameObject* newObj = new CollectibleGameObject(glm::vec3(row + x, col + y, 0.0f), sprite_, &sprite_shader_, tex_[8]);
                         newObj->setType(GameObject::Germ);
@@ -368,7 +369,7 @@ void Game::MainLoop(void)
 {
     // Loop while the user did not close the window
     double last_time = glfwGetTime();
-    while (!glfwWindowShouldClose(window_)){
+    while (!glfwWindowShouldClose(window_) && players[0] != nullptr) {
 
         // Clear background
         glClearColor(viewport_background_color_g.r,
@@ -377,9 +378,8 @@ void Game::MainLoop(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Set view to zoom out, centered by default at 0,0
-        
-        glm::mat4 view_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(camera_zoom, camera_zoom, camera_zoom)) * glm::translate(glm::mat4(1.0f), glm::vec3(players[0]->GetPosition().x * -1, players[0]->GetPosition().y * -1, 0));
-
+        glm::mat4 view_matrix = glm::mat4(1);
+        view_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(camera_zoom, camera_zoom, camera_zoom)) * glm::translate(glm::mat4(1.0f), glm::vec3(players[0]->GetPosition().x * -1, players[0]->GetPosition().y * -1, 0));
         // Calculate delta time
         double current_time = glfwGetTime();
         double delta_time = current_time - last_time;
@@ -393,6 +393,9 @@ void Game::MainLoop(void)
 
         // Push buffer drawn in the background onto the display
         glfwSwapBuffers(window_);
+    }
+    if (players[0] == nullptr) {
+        cout << "GAME OVER! THE HOST BODY WAS ABLE TO REPEL YOU INTO OBLIVION, THEY WILL LOVE A LONG LIFE." << endl;
     }
 }
 
@@ -417,7 +420,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
         }
     }
     else {
-        cout << "YOU WERE UNABLE TO DEFEAT THE HOST BODY IN TIME, THEY WILL LIVE A LONG LIFE" << endl;
+        cout << "GAME OVER! YOU WERE UNABLE TO DEFEAT THE HOST BODY IN TIME, THEY WILL LIVE A LONG LIFE." << endl;
         glfwSetWindowShouldClose(window_, true);
     }
     adjustUiElts();
@@ -547,7 +550,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                         //(except for clone (germ) it has 3 constants up top)
                         case GameObject::Fat:
                             //collect fat powerup, get more special bullets
-                            players[0]->addBulletAmount(3);
+                            players[0]->addBulletAmount(2);
                             SSText->SetText("SS: " + to_string(players[0]->getBulletAmount())); //update the UI
                             break;
                         case GameObject::Germ:
@@ -666,10 +669,7 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                 if (players[1] == nullptr && players[2] == nullptr) {
                     germActivated = false;
                 }
-                if (players[0] == nullptr) {
-                    cout << "GAME OVER." << endl;
-                    glfwSetWindowShouldClose(window_, true);
-                }
+                
 
                 /*
                 if (current_game_object->decreaseHealth() == 0) {
@@ -741,6 +741,7 @@ void Game::Controls(double delta_time)
                 }
                 GameObject* bullet = player->shoot(sprite_, &sprite_shader_, tex_[6]);
                 bullet->SetScale(2 + ((numScales * 0.5)));
+                bullet->setDamage(1);
                 game_objects_.push_back(bullet);
                 // TRAIL PARTICALS
                 GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullet);

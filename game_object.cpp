@@ -31,6 +31,8 @@ GameObject::GameObject(const glm::vec3 &position, Geometry *geom, Shader *shader
     cooldown = 0.7f;
     isMainPlayer = false;
     score = 0;
+    curHealth = 0;
+    maxHealth = 0;
 }
 
 bool GameObject::getHitsEnemies() { return hitsEnemies; }
