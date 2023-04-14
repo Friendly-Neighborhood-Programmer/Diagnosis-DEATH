@@ -19,7 +19,7 @@ void TextGameObject::Render(glm::mat4 view_matrix, double current_time) {
     shader_->SetUniformMat4("view_matrix", view_matrix);
 
     // Setup the scaling matrix for the shader
-    glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_, scale_/2, 1.0)); //bad practice but should get us the desired result 
+    glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_, scale_*0.6, 1.0)); //bad practice but should get us the desired result 
 
     // Setup the rotation matrix for the shader
     glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_, glm::vec3(0.0, 0.0, 1.0));

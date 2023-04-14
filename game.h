@@ -61,6 +61,8 @@ namespace game {
             float germTimer;
             bool germActivated;
 
+            int numScales;
+
             // References to textures
 #define NUM_TEXTURES 13
             GLuint tex_[NUM_TEXTURES];
@@ -92,7 +94,7 @@ namespace game {
             PlayerGameObject* players[NUM_PLAYERS];
 
             //UI stuff
-            void adjustUiElts(glm::vec3 scalar);
+            void adjustUiElts();
             void setTimer(double time);
             std::vector<TextGameObject*> UI_objects_;
             TextGameObject* healthText;

@@ -53,6 +53,7 @@ Game::Game(void)
 
 void Game::Init(void)
 {
+    numScales = 0;
     for (int i = 0; i < NUM_PLAYERS; i++) {
         players[i] = nullptr;
     }
@@ -179,6 +180,7 @@ void Game::Setup(void)
         game_objects_.push_back(newEnemy);
     }
     
+    //lets do max 4 bacteria
     for (int i = 0; i < 4; i++) {
         GameObject* newObj = new CollectibleGameObject(glm::vec3(randF(-4.0, 4.0), randF(-4.0, 4.0), 0.0f), sprite_, &sprite_shader_, tex_[10]);
         newObj->setType(GameObject::Bacteria);
@@ -205,7 +207,7 @@ void Game::Setup(void)
 
 
     // Set up text objs: health, text, and special bullet counters
-    healthText = new TextGameObject(glm::vec3(-3.2f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
+    healthText = new TextGameObject(glm::vec3(-2.2f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
     healthText->SetScale(1.0f);
     healthText->SetText("Health: " + to_string(players[0]->getHealth()) + "/" + to_string(players[0]->getMaxHealth()));
     UI_objects_.push_back(healthText);
@@ -217,13 +219,13 @@ void Game::Setup(void)
     UI_objects_.push_back(timerText);
     game_objects_.push_back(timerText);
 
-    SSText = new TextGameObject(glm::vec3(3.2f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
+    SSText = new TextGameObject(glm::vec3(2.2f, -3.5f, -1.0f), sprite_, &text_shader_, tex_[12]);
     SSText->SetScale(1.0f);
     SSText->SetText("SS: "+to_string(players[0]->getBulletAmount()));
     UI_objects_.push_back(SSText);
     game_objects_.push_back(SSText);
     
-
+    adjustUiElts();
     // Setup background
     // In this specific implementation, the background is always the
     // last object
@@ -468,13 +470,14 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                             break;
                         case GameObject::Bacteria:
                             //collect bacteria powerup, gives size, max hp, damage, zooms out camera
-                            players[0]->SetScale(players[0]->GetScale() + 0.15f);
-                            players[0]->setMaxHealth(players[0]->getMaxHealth() + 1);
-                            players[0]->heal(1);
+                            players[0]->SetScale(players[0]->GetScale() + 0.2f);
+                            players[0]->setMaxHealth(players[0]->getMaxHealth() + 3);
+                            players[0]->heal(3);
                             players[0]->setDamage(players[0]->getDamage() + 1);
                             camera_zoom -= 0.03f;
                             healthText->SetText("Health: " + to_string(players[0]->getHealth())+"/"+ to_string(players[0]->getMaxHealth()));
-                            adjustUiElts(glm::vec3(- 0.03f * 10));
+                            ++numScales;
+                            adjustUiElts();
                             break;
                         default:
                             break;
@@ -667,10 +670,24 @@ void Game::Controls(double delta_time)
     }
 }
 
-void Game::adjustUiElts(glm::vec3 scalar) { //TODO KEEP UI CONSISTNET WITH CAMERA ZOOM and, once its in CAMERA MOVMENT
+void Game::adjustUiElts() { //TODO KEEP UI CONSISTNET WITH CAMERA ZOOM and, once its in CAMERA MOVMENT
     for (int i = 0; i < UI_objects_.size(); i++) {
         //UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() * (glm::vec3(1) + (glm::vec3(-1) * scalar)));
         //UI_objects_[i]->SetScale(UI_objects_[i]->GetScale() * (-1 * scalar.x));
+        UI_objects_[i]->SetScale((numScales * 1.2) * camera_zoom + 2);
+        //health starts at -2.2
+        if (i == 0) {
+            UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() + (glm::vec3(numScales) * glm::vec3(-0.3)));
+        }
+        //timer starts at 0
+        if (i == 1) {
+            UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() + (glm::vec3(numScales) * glm::vec3(0, -0.3, 0)));
+        }
+
+        //SS starts at 3.2
+        if (i == 2) {
+            UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() + (glm::vec3(numScales) * glm::vec3(0.3, -0.3, 0)));
+        }
     }
 }
 
