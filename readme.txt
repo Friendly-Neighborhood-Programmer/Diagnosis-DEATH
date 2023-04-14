@@ -17,9 +17,10 @@ Space - Shoot several bullets in every direction
 
 Met Requirments: 
 
-1. Game mechanics: Get the target score in under 2 minutes. Score is gotten by defeting 
+1. Game mechanics: Get 15 score in under 2 and a half minutes. Score is gotten by defeting 
 enemys, to get the score in the limited time you have, you must make smart use of 
 exploting enemy AI, collecting powerups, and making good use of your special ammo.
+TIP: Stronger enemys are worth more points
 
 2. Enemies: There are 3 enemies with unique textures, weapons, and behavoir.
 
@@ -40,6 +41,7 @@ and save him for last.
 3. Weapons: player can shoot either a single bullet with the "F" key which has a cooldown. Or
 can expend a special point (which you pick up around the world) to shoot a special weapon
 that fires in all directions, no cooldown but spamming this wastes precious ammo.
+Both weapons use diffrent sprites, and are diffrent in apearence.
 
 4. Collectible Items: 3 collectibles, 1 uses a timer, all bring advantage to the player
 
@@ -47,7 +49,7 @@ Germ Surge: Identical Color swapped copies of the player swoop in from all sides
 style next to the player and shoot when the player shoots for a limited time before dying, 
 and can die prematurely from enemy fire.
 
-Fat Coating: gives ammo to special weapon.
+Fat Coating: gives (3) ammo to special weapon.
 
 Bacteria specks: Each one you get will upgrade your character,  grow slightly in size, reduce 
 camera zoom, and get extra health.

@@ -359,7 +359,7 @@ void Game::SetAllTextures(void)
     SetTexture(tex_[13], (resources_directory_g + std::string("/textures/BG_tile1.png")).c_str());
     SetTexture(tex_[14], (resources_directory_g + std::string("/textures/BG_tile2.png")).c_str());
     SetTexture(tex_[15], (resources_directory_g + std::string("/textures/BG_tile3.png")).c_str());
-    SetTexture(tex_[16], (resources_directory_g + std::string("/textures/BG_boss.png")).c_str());
+    SetTexture(tex_[16], (resources_directory_g + std::string("/textures/player_special_bullet.png")).c_str());
     glBindTexture(GL_TEXTURE_2D, tex_[0]);
 }
 
@@ -402,19 +402,24 @@ void Game::addGameObject(GameObject* go) {
 
 void Game::Update(glm::mat4 view_matrix, double delta_time)
 {
-    if (score >= 15) {
-        int milaSecond = (current_time_ - floor(current_time_)) * 100;
-        int t = current_time_ - (milaSecond / 100);
-        int second = t % 60;
-        t -= second;
-        int minute = ((t / 60) % 60);
-        t -= minute;
+    int milaSecond = (current_time_ - floor(current_time_)) * 100;
+    int t = current_time_ - (milaSecond / 100);
+    int second = t % 60;
+    t -= second;
+    int minute = ((t / 60) % 60);
+    t -= minute;
+    if ((minute * 60) + second < (2*60) + 30) { //if you dont collect 15 score in 2 minutes and 30 seconds, you lose
+        if (score >= 15) {
 
-        cout << "YOU WERE VICTORIOUS IN CONQUERING THE HUMAN BODY! It took you "
-             << minute << " minutes, " << second << " seconds and " << milaSecond << " milliseconds." << endl;
+            cout << "YOU WERE VICTORIOUS IN CONQUERING THE HUMAN BODY! It took you "
+                << minute << " minutes, " << second << " seconds and " << milaSecond << " milliseconds." << endl;
+            glfwSetWindowShouldClose(window_, true);
+        }
+    }
+    else {
+        cout << "YOU WERE UNABLE TO DEFEAT THE HOST BODY IN TIME, THEY WILL LIVE A LONG LIFE" << endl;
         glfwSetWindowShouldClose(window_, true);
     }
-
     adjustUiElts();
     // Update time
     current_time_ += delta_time;
@@ -753,7 +758,7 @@ void Game::Controls(double delta_time)
                 if (player == nullptr) {
                     continue;
                 }
-                vector<PlayerBulletGameObject*> bullets = player->spiralShoot(sprite_, &sprite_shader_, tex_[6], numScales);
+                vector<PlayerBulletGameObject*> bullets = player->spiralShoot(sprite_, &sprite_shader_, tex_[16], numScales);
                 for (int i = 0; i < bullets.size(); i++) { //perform things on the bullets in the vector
                     // TRAIL PARTICALS
                     GameObject* particles = new ParticleSystem(glm::vec3(0.0f, -0.4f, -0.5f), trail_particles_, &trail_particle_shader_, tex_[4], bullets[i]);
