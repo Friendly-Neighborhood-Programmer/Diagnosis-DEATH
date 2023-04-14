@@ -483,11 +483,11 @@ void Game::Update(glm::mat4 view_matrix, double delta_time)
                             break;
                         case GameObject::Bacteria:
                             //collect bacteria powerup, gives size, max hp, damage, zooms out camera
-                            players[0]->SetScale(players[0]->GetScale() + 0.2f);
+                            players[0]->SetScale(players[0]->GetScale() + 0.05f);
                             players[0]->setMaxHealth(players[0]->getMaxHealth() + 3);
                             players[0]->heal(3);
                             players[0]->setDamage(players[0]->getDamage() + 1);
-                            camera_zoom -= 0.03f;
+                            camera_zoom -= 0.02f;
                             ++numScales;
                             adjustUiElts();
                             break;
@@ -694,19 +694,19 @@ void Game::adjustUiElts() { //TODO KEEP UI CONSISTNET WITH CAMERA ZOOM and, once
     for (int i = 0; i < UI_objects_.size(); i++) {
         //UI_objects_[i]->SetPosition(UI_objects_[i]->GetPosition() * (glm::vec3(1) + (glm::vec3(-1) * scalar)));
         //UI_objects_[i]->SetScale(UI_objects_[i]->GetScale() * (-1 * scalar.x));
-        UI_objects_[i]->SetScale((numScales * 1.2) * camera_zoom + 2);
+        UI_objects_[i]->SetScale((numScales * 1.2f) * camera_zoom + 2);
         //health starts at -2.2
         if (i == 0) {
-            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(-0.3)));
+            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(-0.2, -0.4, 0)));
         }
         //timer starts at 0
         if (i == 1) {
-            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(0, -0.3, 0)));
+            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(0, -0.4, 0)));
         }
 
         //SS starts at 3.2
         if (i == 2) {
-            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(0.3, -0.3, 0)));
+            UI_objects_[i]->SetPosition(glm::vec3(players[0]->GetPosition().x, players[0]->GetPosition().y, 0) + UI_objects_[i]->getInitPos() + (glm::vec3(numScales) * glm::vec3(0.2, -0.4, 0)));
         }
     }
 }
