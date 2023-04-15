@@ -16,6 +16,7 @@ namespace game {
             void Update(double delta_time) override;
             virtual BulletGameObject* shoot(Geometry* geom, Shader* shader, GLuint texture);
             vector<PlayerBulletGameObject*> spiralShoot(Geometry* sprite, Shader* shader, GLuint texture, int);
+            virtual  void PlayerGameObject::Render(glm::mat4, double);
             virtual int dealDamage();
             double time;
     protected:

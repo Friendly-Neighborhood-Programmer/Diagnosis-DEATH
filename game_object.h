@@ -91,7 +91,6 @@ namespace game {
             void setIsMainPlayer(bool mp) { isMainPlayer = mp; }
             bool getIsMainPlayer() { return isMainPlayer; }
             bool isUi() { return oType == UI; }
-    private:
 
         protected:
             bool hitsEnemies;

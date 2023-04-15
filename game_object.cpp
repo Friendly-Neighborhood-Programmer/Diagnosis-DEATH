@@ -180,6 +180,10 @@ void GameObject::Render(glm::mat4 view_matrix, double current_time){
     // Set the transformation matrix in the shader
     shader_->SetUniformMat4("transformation_matrix", transformation_matrix);
 
+    shader_->SetUniform1f("time", current_time);
+
+    shader_->SetUniform1i("special", 0);
+
     // Set up the geometry
     geometry_->SetGeometry(shader_->GetShaderProgram());
 

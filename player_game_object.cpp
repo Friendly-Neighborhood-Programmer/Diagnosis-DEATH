@@ -65,4 +65,54 @@ vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, 
 
     return bullets;
 }
+
+void PlayerGameObject::Render(glm::mat4 view_matrix, double current_time) {
+    if (state_ == DyingBullet) return; //if dying bullet, dont render
+    // Set up the shader
+    shader_->Enable();
+
+    // Set up the view matrix
+    shader_->SetUniformMat4("view_matrix", view_matrix);
+
+    // store all transformationsw
+    glm::mat4 transformation_matrix;
+
+    // integrate hierarchical transformation from parent's transformation matrix
+    /*if (parent) {
+        glm::mat4 p_scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(parent->scale_, parent->scale_, 1.0));
+        glm::mat4 p_rotation_matrix = glm::rotate(glm::mat4(1.0f), parent->angle_, glm::vec3(0.0, 0.0, 1.0));
+        glm::mat4 p_translation_matrix = glm::translate(glm::mat4(1.0f), parent->position_);
+
+        transformation_matrix = p_translation_matrix * p_rotation_matrix * p_scaling_matrix;
+    }*/
+
+    // this object's transformations
+    // Setup the scaling matrix for the shader
+    glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_, scale_, 1.0));
+
+    // Setup the rotation matrix for the shader
+    glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_, glm::vec3(0.0, 0.0, 1.0));
+
+    // Set up the translation matrix for the shader
+    glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), position_);
+
+    // Setup the transformation matrix for the shader
+    transformation_matrix *= translation_matrix * rotation_matrix * scaling_matrix;
+
+    // Set the transformation matrix in the shader
+    shader_->SetUniformMat4("transformation_matrix", transformation_matrix);
+
+    shader_->SetUniform1f("time", current_time);
+
+    shader_->SetUniform1i("special", 1);
+
+    // Set up the geometry
+    geometry_->SetGeometry(shader_->GetShaderProgram());
+
+    // Bind the entity's texture
+    glBindTexture(GL_TEXTURE_2D, texture_);
+
+    // Draw the entity
+    glDrawElements(GL_TRIANGLES, geometry_->GetSize(), GL_UNSIGNED_INT, 0);
+}
 } // namespace game
