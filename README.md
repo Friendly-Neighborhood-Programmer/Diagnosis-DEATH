@@ -1,5 +1,5 @@
 # 2501-Final-Project - Diagnosis: DEATH
 
-In a departure from out usual projects, we prioritized learning, and implimentation over design.
+Instead of focusing on good game design, as done in our usual projects, we prioritized learning and implementation.
 
-<img src="textures/player.png" alt="a photo">
+<img src="textures/game_showcase.png" alt="a photo of our game">

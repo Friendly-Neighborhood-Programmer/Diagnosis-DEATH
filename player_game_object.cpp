@@ -56,7 +56,7 @@ vector<PlayerBulletGameObject*> PlayerGameObject::spiralShoot(Geometry* sprite, 
         glm::vec3 dir = glm::vec3(glm::cos(angle), glm::sin(angle), 0);
 
         PlayerBulletGameObject* bullet = new PlayerBulletGameObject(position_, angle-glm::radians(90.f), dir, sprite, shader, texture);
-        bullet->setDamage(getDamage());
+        bullet->setDamage(2);
         bullet->SetScale(2 + ((numScales * 0.5)));
         
         //add to collection of all bullets

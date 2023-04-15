@@ -63,7 +63,7 @@ namespace game {
             void SetParent(GameObject*);
             void setType(ObjectType type) { oType = type; }
             void setDamage(int amount) { damage = amount; }
-            void setMaxHealth(int newHealth) { maxHealth = newHealth; if (maxHealth > curHealth) curHealth = maxHealth; }
+            void setMaxHealth(int newHealth) { maxHealth = newHealth; }
             int getMaxHealth() { return maxHealth; }
             int getHealth() { return curHealth; }
             virtual void setChildParticle(GameObject* newP) { particle = newP; };
