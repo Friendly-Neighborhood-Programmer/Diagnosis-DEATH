@@ -1,11 +1,11 @@
-Authors: Vitaly Dufour (101247178), William Graham (101228346)
+Authors: Vitaly Dufour (101247178), William Graham (101228346), Isaac Robert (101232719)
 
 OS: Windows
 
 How to Play:
     You are a germ that has invaded the body, the body has many natural defenses
     and it will use them to repel you. Get the target score (15) in 2:30 minutes to win the game.
-    You can acrue score by defeating enemies, stronger enemies will get you more score.
+    You can accrue score by defeating enemies, stronger enemies will get you more score.
 
 
 Controls:
@@ -73,7 +73,7 @@ parametric bassed: All Enemies.
 6. Collision detection: Collisions are detected in many ways, getting hit, picking up things, etc.
 
 7. Game World: You can scroll, the map is made up of many different tiles with different appearences.
-	       The world is fully randomized every time you run it, giving it a unique feel every time.
+The world is fully randomized every time you run it, giving it a unique feel every time.
 
 8. Particle Systems: There are 3 instances of particles, 2 are very different.
 
@@ -95,8 +95,8 @@ The white bloodcell also has the flee behaviour, implementations are discussed a
 11. Code readability and organization:
 We left comments frequently, and where possible organized code into functions/methods.
 
-12. Bonus: The player's copies from the germ surge powerup use a special shader to show a 'ghost-like'
-	   effect, so it is easy for the player to know who he is among the 3 'players' on the screen.
+12. Bonus: The player and its copies from the germ surge powerup use a special shader to show a 'mutant like virus visual' 
+effect, so it is easy for the player to identify themselves from the other cells on the screen.
 
 Credits:
 All art either provided by Professor Oliver or created by the group for this project.
