@@ -1,4 +1,4 @@
-Authors: Vitaly Dufour (101247178)
+Authors: Vitaly Dufour (101247178), William Graham (101228346)
 
 OS: Windows
 
